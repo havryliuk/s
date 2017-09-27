@@ -2,12 +2,11 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <html>
   <head>
-    <title>$Title$</title>
+    <title>List of products</title>
   </head>
   <body>
   <form action="productList">
-      Products:<br>
-      <table border="1">
+      <table>
           <tr>
               <th>Description</th>
               <th>Price</th>
@@ -15,12 +14,15 @@
           </tr>
       <c:forEach items="${products}" var="i">
           <tr>
-              <td>${i.getDescription()}</td>
+              <td>
+                  <a href="product/${i.getId()}">
+                      ${i.getDescription()}</a></td>
               <td>${i.getPrice()}</td>
               <td>${i.getCategory()}</td>
           </tr>
       </c:forEach>
       </table>
   </form>
+  <a href="adminMain">Go back</a>
   </body>
 </html>

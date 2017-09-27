@@ -4,14 +4,16 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
 @Getter
 @Setter
 @ToString
-@AllArgsConstructor
+@Builder
 public class Product implements Serializable {
     private int id;
     private String description;

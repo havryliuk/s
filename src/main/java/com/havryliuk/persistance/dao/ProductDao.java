@@ -2,6 +2,7 @@ package com.havryliuk.persistance.dao;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -21,14 +22,15 @@ public class ProductDao implements GenericStoreDao<Product> {
     public List<Product> findAll() {
         List<Product> products = new ArrayList<>();
 
-        try (Statement statement = connection.createStatement()) {
-            ResultSet rs = statement.executeQuery("SELECT * FROM PRODUCT ORDER BY ID");
-            while(rs.next()) {
+        try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM PRODUCT ORDER BY ID")) {
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
                 int id = rs.getInt("id");
                 String description = rs.getString("description");
                 BigDecimal price = rs.getBigDecimal("price");
                 ProductCategory category = ProductCategory.valueOf(rs.getString("category").trim());
-                Product product = new Product(id, description, price, category);
+                Product product = Product.builder().id(id).description(description).price(price).category(category)
+                        .build();
                 products.add(product);
             }
         } catch (SQLException e) {
@@ -38,22 +40,62 @@ public class ProductDao implements GenericStoreDao<Product> {
     }
 
     @Override
-    public int save(Product object) {
-        return 0;
+    public int save(Product product) {
+        int id = -1;
+        try (PreparedStatement statement = connection.prepareStatement(
+                "INSERT INTO PRODUCT (description, price, category) VALUES (?, ?, ?)",
+                Statement.RETURN_GENERATED_KEYS)) {
+            statement.setString(1, product.getDescription());
+            statement.setBigDecimal(2, product.getPrice());
+            statement.setString(3, product.getCategory().name());
+            statement.executeUpdate();
+            ResultSet rs = statement.getGeneratedKeys();
+            if (rs.next()) {
+                id = rs.getInt(1);
+                product.setId(id);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return id;
     }
 
     @Override
-    public boolean delete(Product object) {
+    public boolean delete(Product product) {
         return false;
     }
 
     @Override
     public Product find(int id) {
+        try (PreparedStatement statement = connection.prepareStatement(
+                "SELECT * FROM PRODUCT WHERE id = ?")) {
+            statement.setInt(1, id);
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                String description = rs.getString("description");
+                BigDecimal price = rs.getBigDecimal("price");
+                ProductCategory category = ProductCategory.valueOf(rs.getString("category").trim());
+                return Product.builder().id(id).description(description).price(price).category(category).build();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
     @Override
-    public boolean update(Product object) {
-        return false;
+    public boolean update(Product product) {
+        int count = 0;
+        try (PreparedStatement statement = connection.prepareStatement(
+                "UPDATE PRODUCT SET description = ?, price = ?, category = ? WHERE id = ?")) {
+            statement.setString(1, product.getDescription());
+            statement.setBigDecimal(2, product.getPrice());
+            statement.setString(3, product.getCategory().toString());
+            statement.setInt(4, product.getId());
+            count = statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return count > 0;
     }
 }

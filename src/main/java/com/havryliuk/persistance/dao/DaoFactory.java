@@ -11,19 +11,27 @@ public class DaoFactory {
     private Connection connection;
 
     public DaoFactory() {
-        //InputStream in = DaoFactory.class.getResourceAsStream("/db.properties");
-        //Properties properties = new Properties();
+        InputStream in = DaoFactory.class.getResourceAsStream("/db.properties");
+        Properties properties = new Properties();
         try {
-            //properties.load(in);
-            Class.forName("org.postgresql.Driver");
-            connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/store",
-                    "postgres", "juswenko");
-        } catch (SQLException | ClassNotFoundException e) {
+            properties.load(in);
+            Class.forName(properties.getProperty("db.driver"));
+            connection = DriverManager.getConnection(properties.getProperty("db.url"),
+                    properties.getProperty("db.username"), properties.getProperty("db.password"));
+        } catch (SQLException | ClassNotFoundException | IOException e) {
             e.printStackTrace();
         }
     }
 
     public ProductDao getProductDao() {
         return new ProductDao(connection);
+    }
+
+    public UserDao getUserDao() {
+        return new UserDao(connection);
+    }
+
+    public CustomerDao getCustomerDao() {
+        return new CustomerDao(connection);
     }
 }
