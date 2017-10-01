@@ -26,4 +26,14 @@ public class OrderService {
         OrderDao dao = new DaoFactory().getOrderDao();
         return dao.findAllByCustomerId(customerId);
     }
+
+    public Optional<Order> getOrderById(int id) {
+        OrderDao dao = new DaoFactory().getOrderDao();
+        return dao.find(id);
+    }
+
+    public boolean payOrder(int id) {
+        OrderDao dao = new DaoFactory().getOrderDao();
+        return dao.payOrder(id);
+    }
 }

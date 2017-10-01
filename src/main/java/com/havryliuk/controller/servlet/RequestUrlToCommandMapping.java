@@ -5,6 +5,8 @@ import java.util.Map;
 
 import com.havryliuk.controller.command.order.CartCommand;
 import com.havryliuk.controller.command.order.ListOrdersCommand;
+import com.havryliuk.controller.command.order.OrderCommand;
+import com.havryliuk.controller.command.order.PayOrderCommand;
 import com.havryliuk.controller.command.order.SubmitOrderCommand;
 import com.havryliuk.controller.command.product.AddProductCommand;
 import com.havryliuk.controller.command.customer.BlockCustomerCommand;
@@ -37,6 +39,7 @@ final class RequestUrlToCommandMapping {
         GET_REQUESTS_URL_COMMAND_MAPPING.put("index", new SamePageCommand());
         GET_REQUESTS_URL_COMMAND_MAPPING.put("cart", new CartCommand());
         GET_REQUESTS_URL_COMMAND_MAPPING.put("orders", new ListOrdersCommand());
+        GET_REQUESTS_URL_COMMAND_MAPPING.put("order", new OrderCommand());
     }
     final static Map<String, Command> POST_REQUESTS_URL_COMMAND_MAPPING = new HashMap<>();
     static {
@@ -46,5 +49,6 @@ final class RequestUrlToCommandMapping {
         POST_REQUESTS_URL_COMMAND_MAPPING.put("customerBlock", new BlockCustomerCommand());
         POST_REQUESTS_URL_COMMAND_MAPPING.put("addedToCart", new AddProductToCartCommand());
         POST_REQUESTS_URL_COMMAND_MAPPING.put("submitOrder", new SubmitOrderCommand());
+        POST_REQUESTS_URL_COMMAND_MAPPING.put("payOrder", new PayOrderCommand());
     }
 }

@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -28,7 +29,7 @@ public class OrderDao implements GenericStoreDao<Order> {
     public List<Order> findAllByCustomerId(int customerId) {
         List<Order> orders = new ArrayList<>();
         try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM public.order" +
-                " WHERE customer_id = ?")) {
+                " WHERE customer_id = ? ORDER BY id")) {
             statement.setInt(1, customerId);
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
@@ -91,11 +92,59 @@ public class OrderDao implements GenericStoreDao<Order> {
 
     @Override
     public Optional<Order> find(int id) {
+        boolean paid;
+        try (PreparedStatement statement = connection.prepareStatement("SELECT paid FROM public.order WHERE id = ?")) {
+            statement.setInt(1, id);
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                paid = rs.getBoolean("paid");
+                Map<Product, Integer> orderLines = getOrderLines(id);
+                return Optional.ofNullable(Order.builder().id(id).paid(paid).products(orderLines).build());
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return Optional.empty();
+    }
+
+    private Map<Product, Integer> getOrderLines(int id) {
+        Map<Product, Integer> orderLines = new HashMap<>();
+        try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM order_lines" +
+                " WHERE order_id=?")) {
+            statement.setInt(1, id);
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                int productId = rs.getInt("product_id");
+                Optional<Product> product = new DaoFactory().getProductDao().find(productId);
+                if (product.isPresent()) {
+                    int quantity = rs.getInt("quantity");
+                    orderLines.put(product.get(), quantity);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return orderLines;
     }
 
     @Override
     public boolean update(Order object) {
+        return false;
+    }
+
+    public boolean payOrder(int id) {
+        try (PreparedStatement statement = connection.prepareStatement("UPDATE public.order SET paid=?" +
+                " WHERE id=?")) {
+            statement.setBoolean(1, true);
+            statement.setInt(2, id);
+            int result = statement.executeUpdate();
+            if (result > 0) {
+                return true;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return false;
     }
 }

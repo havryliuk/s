@@ -35,7 +35,6 @@ public class SubmitOrderCommand extends AbstractOrderCommand implements Command 
                 return "orderSubmitted.jsp";
             }
         }
-        request.setAttribute("message", "Order creation failed!");
-        return "error.jsp";
+        return errorPageWithMessage(request, "Order creation failed!");
     }
 }

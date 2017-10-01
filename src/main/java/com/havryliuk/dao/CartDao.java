@@ -19,7 +19,8 @@ public class CartDao implements GenericStoreDao<CartEntry> {
 
     public Map<Integer, Integer> findAllByCustomerId(int id) {
         Map<Integer, Integer> entries = new HashMap<>();
-        try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM cart where customer_id=?")) {
+        try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM cart where customer_id=?" +
+                " ORDER BY product_id")) {
             statement.setInt(1, id);
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
@@ -66,7 +67,7 @@ public class CartDao implements GenericStoreDao<CartEntry> {
     }
 
     @Override
-    public boolean delete(CartEntry object) {
+    public boolean delete(CartEntry cartEntry) {
         return false;
     }
 
