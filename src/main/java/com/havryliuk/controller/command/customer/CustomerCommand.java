@@ -15,7 +15,7 @@ public class CustomerCommand implements Command {
         int id = Integer.parseInt(request.getRequestURI().replaceAll("\\D+", ""));
         Optional<Customer> customer = new CustomerService().getCustomerById(id);
         if (customer.isPresent()) {
-            request.setAttribute("customer", customer);
+            request.setAttribute("customer", customer.get());
             return "customer.jsp";
         } else {
             return "error.jsp";

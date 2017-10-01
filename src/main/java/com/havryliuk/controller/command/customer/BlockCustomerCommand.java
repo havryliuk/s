@@ -6,10 +6,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.havryliuk.controller.command.Command;
+import com.havryliuk.controller.command.CommonCommand;
 import com.havryliuk.entity.Customer;
 import com.havryliuk.service.CustomerService;
 
-public class BlockCustomerCommand implements Command {
+public class BlockCustomerCommand extends CommonCommand implements Command {
     @Override
     public String execute(HttpServletRequest request, HttpServletResponse response) {
         boolean result;
@@ -20,20 +21,20 @@ public class BlockCustomerCommand implements Command {
         boolean blocked;
         if (customer.isPresent()) {
             blocked = customer.get().isBlocked();
-        } else {
-            return "error.jsp";
-        }
+            if (!blocked) {
+                result = service.blockCustomer(id);
+            } else {
+                result = service.unblockCustomer(id);
+            }
 
-        if (!blocked) {
-            result = service.blockCustomer(id);
+            request.setAttribute("customer", service.getCustomerById(id));
+            if (result) {
+                return "customerBlocked.jsp";
+            } else {
+                return "customerNotBlocked.jsp";
+            }
         } else {
-            result = service.unblockCustomer(id);
-        }
-        request.setAttribute("customer", service.getCustomerById(id));
-        if (result) {
-            return "customerBlocked.jsp";
-        } else {
-            return "customerNotBlocked.jsp";
+            return errorPageWithMessage(request, "Customer to block/unblock not found.");
         }
     }
 }
