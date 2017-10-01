@@ -23,7 +23,7 @@ public class OrderDao implements GenericStoreDao<Order> {
 
     @Override
     public List<Order> findAll() {
-        return null;
+        return new ArrayList<>();
     }
 
     public List<Order> findAllByCustomerId(int customerId) {
@@ -61,22 +61,29 @@ public class OrderDao implements GenericStoreDao<Order> {
 
             for (Map.Entry<Product, Integer> row : order.getProducts().entrySet()) {
                 int productId = row.getKey().getId();
-                PreparedStatement linesStatement = connection.prepareStatement("INSERT INTO order_lines (order_id, product_id, quantity)" +
-                        " VALUES (?, ?, ?)");
-                linesStatement.setInt(1, order.getId());
-                linesStatement.setInt(2, productId);
-                linesStatement.setInt(3, row.getValue());
-                int result = linesStatement.executeUpdate();
-                if (result <= 0) {
-                    return -1;
+                try (PreparedStatement linesStatement = connection.prepareStatement("INSERT INTO order_lines " +
+                        "(order_id, product_id, quantity) VALUES (?, ?, ?)")) {
+                    linesStatement.setInt(1, order.getId());
+                    linesStatement.setInt(2, productId);
+                    linesStatement.setInt(3, row.getValue());
+                    int result = linesStatement.executeUpdate();
+                    if (result <= 0) {
+                        return -1;
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
                 }
             }
 
-            PreparedStatement deleteCartStatement = connection.prepareStatement("DELETE FROM cart WHERE customer_id=?");
-            deleteCartStatement.setInt(1, order.getCustomer().getId());
-            int result = deleteCartStatement.executeUpdate();
-            if (result <= 0) {
-                return -1;
+            try (PreparedStatement deleteCartStatement = connection.prepareStatement("DELETE FROM cart WHERE " +
+                    "customer_id=?")) {
+                deleteCartStatement.setInt(1, order.getCustomer().getId());
+                int result = deleteCartStatement.executeUpdate();
+                if (result <= 0) {
+                    return -1;
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
 
         } catch (SQLException e) {

@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +13,9 @@ import java.util.Optional;
 import com.havryliuk.entity.CartEntry;
 
 public class CartDao implements GenericStoreDao<CartEntry> {
+    private static final String QUANTITY = "quantity";
     private Connection connection;
+
     CartDao(Connection connection) {
         this.connection = connection;
     }
@@ -25,7 +28,7 @@ public class CartDao implements GenericStoreDao<CartEntry> {
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
                 int productId = rs.getInt("product_id");
-                int quantity = rs.getInt("quantity");
+                int quantity = rs.getInt(QUANTITY);
                 entries.put(productId, quantity);
             }
         } catch (SQLException e) {
@@ -49,7 +52,7 @@ public class CartDao implements GenericStoreDao<CartEntry> {
 
     @Override
     public List<CartEntry> findAll() {
-        return null;
+        return new ArrayList<>();
     }
 
     @Override
@@ -100,11 +103,11 @@ public class CartDao implements GenericStoreDao<CartEntry> {
             if (rs.next()) {
                 int customerId = rs.getInt("customer_id");
                 int productId = rs.getInt("product_id");
-                int quantity = rs.getInt("quantity");
+                int quantity = rs.getInt(QUANTITY);
                 Map<String, Integer> cartEntryMap = new HashMap<>();
                 cartEntryMap.put("customerId", customerId);
                 cartEntryMap.put("productId", productId);
-                cartEntryMap.put("quantity", quantity);
+                cartEntryMap.put(QUANTITY, quantity);
                 return cartEntryMap;
             }
         } catch (SQLException e) {

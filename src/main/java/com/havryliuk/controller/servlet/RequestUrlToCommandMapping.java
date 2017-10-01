@@ -23,6 +23,10 @@ import com.havryliuk.controller.command.product.UpdateProductCommand;
 
 final class RequestUrlToCommandMapping {
     final static Map<String, Command> GET_REQUESTS_URL_COMMAND_MAPPING = new HashMap<>();
+
+    private RequestUrlToCommandMapping() {
+        throw new IllegalAccessError("Utilities class. Cannot be instantiated.");
+    }
     static {
         GET_REQUESTS_URL_COMMAND_MAPPING.put("", new MainCommand());
         GET_REQUESTS_URL_COMMAND_MAPPING.put("productList", new ListProductsCommand());

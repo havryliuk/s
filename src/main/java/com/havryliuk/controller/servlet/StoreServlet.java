@@ -18,21 +18,26 @@ import static com.havryliuk.controller.servlet.RequestUrlToCommandMapping.POST_R
 @WebServlet("/store/*")
 public class StoreServlet extends HttpServlet {
     @Override
-    public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    public void doGet(HttpServletRequest request, HttpServletResponse response) {
         processRequest(request, response, GET_REQUESTS_URL_COMMAND_MAPPING);
     }
 
     @Override
-    public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    public void doPost(HttpServletRequest request, HttpServletResponse response) {
         processRequest(request, response, POST_REQUESTS_URL_COMMAND_MAPPING);
     }
 
     private void processRequest(HttpServletRequest request, HttpServletResponse response, Map<String, Command>
-            mapping) throws ServletException, IOException {
+            mapping) {
         Command command = mapping.get(request.getRequestURI()
                 .replace("/store/", "")
                 .replaceAll("/\\d+", ""));
         String pageName = command.execute(request, response);
-        request.getRequestDispatcher("/WEB-INF/view/" + pageName).forward(request, response);
+
+        try {
+            request.getRequestDispatcher("/WEB-INF/view/" + pageName).forward(request, response);
+        } catch (ServletException | IOException e) {
+            e.printStackTrace();
+        }
     }
 }
