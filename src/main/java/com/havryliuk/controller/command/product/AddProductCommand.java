@@ -1,7 +1,6 @@
 package com.havryliuk.controller.command.product;
 
 import java.math.BigDecimal;
-import java.util.Objects;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -9,9 +8,8 @@ import javax.servlet.http.HttpServletResponse;
 import com.havryliuk.controller.command.Command;
 import com.havryliuk.entity.Product;
 import com.havryliuk.entity.ProductCategory;
-import com.havryliuk.persistance.dao.DaoFactory;
-import com.havryliuk.persistance.dao.ProductDao;
-import com.havryliuk.util.FormatValidator;
+import com.havryliuk.dao.DaoFactory;
+import com.havryliuk.dao.ProductDao;
 
 public class AddProductCommand implements Command {
 
@@ -25,14 +23,18 @@ public class AddProductCommand implements Command {
             Product product = Product.builder().category(category).price(price).description(description).build();
             ProductDao dao = new DaoFactory().getProductDao();
             int id = dao.save(product);
-            product.setId(id);
+            if (id > 0) {
+                product.setId(id);
 
-            request.setAttribute("product", product);
-            return "productAdded.jsp";
+                request.setAttribute("product", product);
+                return "productAdded.jsp";
+            }
         } else {
             request.setAttribute("description", description);
             request.setAttribute("price", price);
             return "invalidProductData.jsp";
+
         }
+        return "error.jsp";
     }
 }

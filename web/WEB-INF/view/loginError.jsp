@@ -4,7 +4,7 @@
     <title>Invalid username/password</title>
 </head>
 <body>
-Username/password not correct!<br>
-<a href="index">Try again</a>
+Username/password not correct!<br><br>
+<a href="../../">Try again</a>
 </body>
 </html>

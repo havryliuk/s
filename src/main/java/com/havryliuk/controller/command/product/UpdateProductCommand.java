@@ -8,8 +8,8 @@ import javax.servlet.http.HttpServletResponse;
 import com.havryliuk.controller.command.Command;
 import com.havryliuk.entity.Product;
 import com.havryliuk.entity.ProductCategory;
-import com.havryliuk.persistance.dao.DaoFactory;
-import com.havryliuk.persistance.dao.ProductDao;
+import com.havryliuk.dao.DaoFactory;
+import com.havryliuk.dao.ProductDao;
 
 public class UpdateProductCommand implements Command {
     @Override

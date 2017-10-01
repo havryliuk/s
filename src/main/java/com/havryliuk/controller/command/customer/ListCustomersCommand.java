@@ -7,8 +7,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.havryliuk.controller.command.Command;
 import com.havryliuk.entity.Customer;
-import com.havryliuk.persistance.dao.DaoFactory;
-import com.havryliuk.persistance.dao.CustomerDao;
+import com.havryliuk.dao.DaoFactory;
+import com.havryliuk.dao.CustomerDao;
 
 public class ListCustomersCommand implements Command {
     @Override

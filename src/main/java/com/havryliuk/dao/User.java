@@ -1,4 +1,4 @@
-package com.havryliuk.persistance.dao;
+package com.havryliuk.dao;
 
 public class User {
     private String username;

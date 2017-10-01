@@ -4,11 +4,12 @@
     <title>Customer</title>
 </head>
 <body>
-<form action="../customerBlocked" method="post">
+<form action="../customerBlock" method="post">
     <input type="hidden" value="${customer.getId()}" name="id">
     <label>Name: ${customer.getName()}</label><br>
-    <label>Blocked: ${customer.isBlocked().equals(true) ? "Yes" : "No"}</label><br>
-    <input type="submit" ${customer.isBlocked().equals(true) ? "disabled" : ""} value="Block">
+    <label>Blocked: ${customer.isBlocked() ? "Yes" : "No"}
+    </label><br>
+    <input type="submit" value=${customer.isBlocked() ? "Unblock" : "Block"}>
 </form>
 <a href="../customerList">Back to customer list</a>
 </body>

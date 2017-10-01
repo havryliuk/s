@@ -1,4 +1,4 @@
-package com.havryliuk.persistance.dao;
+package com.havryliuk.dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -29,5 +29,21 @@ public class UserDao {
             e.printStackTrace();
         }
         return type;
+    }
+
+    public int getIdByName(String name) {
+        int id = 0;
+        try (PreparedStatement statement = connection.prepareStatement("SELECT id FROM public.user" +
+                " WHERE username=?")) {
+            statement.setString(1, name);
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                id = rs.getInt("id");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return id;
     }
 }

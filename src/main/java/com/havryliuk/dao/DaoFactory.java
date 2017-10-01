@@ -1,4 +1,4 @@
-package com.havryliuk.persistance.dao;
+package com.havryliuk.dao;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,5 +33,13 @@ public class DaoFactory {
 
     public CustomerDao getCustomerDao() {
         return new CustomerDao(connection);
+    }
+
+    public CartDao getCartDao() {
+        return new CartDao(connection);
+    }
+
+    public OrderDao getOrderDao() {
+        return new OrderDao(connection);
     }
 }

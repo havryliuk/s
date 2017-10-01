@@ -1,4 +1,4 @@
-package com.havryliuk.persistance.dao;
+package com.havryliuk.dao;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import com.havryliuk.entity.Product;
 import com.havryliuk.entity.ProductCategory;
@@ -66,7 +67,7 @@ public class ProductDao implements GenericStoreDao<Product> {
     }
 
     @Override
-    public Product find(int id) {
+    public Optional<Product> find(int id) {
         try (PreparedStatement statement = connection.prepareStatement(
                 "SELECT * FROM PRODUCT WHERE id = ?")) {
             statement.setInt(1, id);
@@ -75,12 +76,13 @@ public class ProductDao implements GenericStoreDao<Product> {
                 String description = rs.getString("description");
                 BigDecimal price = rs.getBigDecimal("price");
                 ProductCategory category = ProductCategory.valueOf(rs.getString("category").trim());
-                return Product.builder().id(id).description(description).price(price).category(category).build();
+                return Optional.ofNullable(Product.builder().id(id).description(description).price(price).category
+                        (category).build());
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return null;
+        return Optional.empty();
     }
 
     @Override

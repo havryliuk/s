@@ -3,8 +3,9 @@ package com.havryliuk.controller.command;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.havryliuk.persistance.dao.DaoFactory;
-import com.havryliuk.persistance.dao.UserType;
+import com.havryliuk.dao.DaoFactory;
+import com.havryliuk.dao.UserType;
+import com.havryliuk.service.SecurityService;
 
 public class LoginCommand implements Command {
     @Override
@@ -16,10 +17,12 @@ public class LoginCommand implements Command {
             UserType type = new DaoFactory().getUserDao().getType(username, password);
             if (type != null) {
                 request.setAttribute("usertype", type);
+                request.getSession().setAttribute("userType", type.toString());
+                request.getSession().setAttribute("userId", new SecurityService().getUserIdByName(username));
                 if (type.equals(UserType.ADMIN)) {
                     return "adminMain.jsp";
                 } else if (type.equals(UserType.CUSTOMER)) {
-                    return "userMain.jsp";
+                    return "customerMain.jsp";
                 }
             }
         }

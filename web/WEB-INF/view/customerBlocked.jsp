@@ -4,7 +4,7 @@
     <title>Customer blocked</title>
 </head>
 <body>
-<label>Customer ${customer.getName()} blocked!</label><br>
-<a href="../customerList">Back to customer list</a>
+<label>Customer ${customer.getName()} ${customer.isBlocked() ? "" : "un"}blocked!</label><br>
+<a href="customerList">Back to customer list</a>
 </body>
 </html>

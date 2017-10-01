@@ -1,3 +1,4 @@
+<%@ page import="com.havryliuk.dao.UserType" %>
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <html>
@@ -23,6 +24,10 @@
       </c:forEach>
       </table>
   </form>
+  <%if (session.getAttribute("userType").equals((UserType.ADMIN).toString())) {%>
   <a href="adminMain">Go back</a>
+  <%} else if (session.getAttribute("userType").equals((UserType.CUSTOMER).toString())) {%>
+  <a href="customerMain">Go back</a>
+  <%}%>
   </body>
 </html>
