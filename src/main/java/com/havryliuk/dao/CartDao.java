@@ -10,10 +10,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.log4j.Logger;
+
 import com.havryliuk.entity.CartEntry;
 
 public class CartDao implements GenericStoreDao<CartEntry> {
     private static final String QUANTITY = "quantity";
+    private static final Logger LOG = Logger.getLogger(CartDao.class);
     private Connection connection;
 
     CartDao(Connection connection) {
@@ -32,7 +35,7 @@ public class CartDao implements GenericStoreDao<CartEntry> {
                 entries.put(productId, quantity);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error(e);
         }
         return entries;
     }
@@ -45,7 +48,7 @@ public class CartDao implements GenericStoreDao<CartEntry> {
                 return true;
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error(e);
         }
         return false;
     }
@@ -64,7 +67,7 @@ public class CartDao implements GenericStoreDao<CartEntry> {
             statement.setInt(3, cartEntry.getProduct().getId());
             return statement.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error(e);
         }
         return 0;
     }
@@ -91,7 +94,7 @@ public class CartDao implements GenericStoreDao<CartEntry> {
             statement.setInt(3, productId);
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error(e);
         }
         return false;
     }
@@ -111,7 +114,7 @@ public class CartDao implements GenericStoreDao<CartEntry> {
                 return cartEntryMap;
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error(e);
         }
         return new HashMap<>();
     }

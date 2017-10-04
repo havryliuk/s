@@ -5,7 +5,6 @@ import java.math.BigDecimal;
 
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.ToString;
 
 @Getter

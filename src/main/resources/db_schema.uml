@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>DATABASE</ID>
+  <OriginalElement>308f8bc0-2b1c-48b2-9ddf-ea6bf75b56ab</OriginalElement>
+  <nodes>
+    <node x="333.125" y="0.0">308f8bc0-2b1c-48b2-9ddf-ea6bf75b56ab.TABLE:store.public.user</node>
+    <node x="378.25" y="392.0">308f8bc0-2b1c-48b2-9ddf-ea6bf75b56ab.TABLE:store.public.order_lines</node>
+    <node x="344.125" y="210.0">308f8bc0-2b1c-48b2-9ddf-ea6bf75b56ab.TABLE:store.public.customer</node>
+    <node x="95.125" y="196.0">308f8bc0-2b1c-48b2-9ddf-ea6bf75b56ab.TABLE:store.public.product</node>
+    <node x="0.0" y="392.0">308f8bc0-2b1c-48b2-9ddf-ea6bf75b56ab.TABLE:store.public.cart</node>
+    <node x="554.125" y="209.5">308f8bc0-2b1c-48b2-9ddf-ea6bf75b56ab.TABLE:store.public.order</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="308f8bc0-2b1c-48b2-9ddf-ea6bf75b56ab.TABLE:store.public.cart" target="308f8bc0-2b1c-48b2-9ddf-ea6bf75b56ab.TABLE:store.public.product">
+      <point x="50.25" y="-59.0" />
+      <point x="150.75" y="367.0" />
+      <point x="152.375" y="367.0" />
+      <point x="-57.25" y="73.0" />
+    </edge>
+    <edge source="308f8bc0-2b1c-48b2-9ddf-ea6bf75b56ab.TABLE:store.public.order_lines" target="308f8bc0-2b1c-48b2-9ddf-ea6bf75b56ab.TABLE:store.public.product">
+      <point x="-47.5" y="-59.0" />
+      <point x="425.75" y="367.0" />
+      <point x="266.875" y="367.0" />
+      <point x="57.25" y="73.0" />
+    </edge>
+    <edge source="308f8bc0-2b1c-48b2-9ddf-ea6bf75b56ab.TABLE:store.public.order" target="308f8bc0-2b1c-48b2-9ddf-ea6bf75b56ab.TABLE:store.public.user">
+      <point x="0.0" y="-59.5" />
+      <point x="654.625" y="171.0" />
+      <point x="509.7916666666667" y="171.0" />
+      <point x="70.66666666666669" y="73.0" />
+    </edge>
+    <edge source="308f8bc0-2b1c-48b2-9ddf-ea6bf75b56ab.TABLE:store.public.customer" target="308f8bc0-2b1c-48b2-9ddf-ea6bf75b56ab.TABLE:store.public.user">
+      <point x="0.0" y="-59.0" />
+      <point x="0.0" y="73.0" />
+    </edge>
+    <edge source="308f8bc0-2b1c-48b2-9ddf-ea6bf75b56ab.TABLE:store.public.cart" target="308f8bc0-2b1c-48b2-9ddf-ea6bf75b56ab.TABLE:store.public.user">
+      <point x="-50.25" y="-59.0" />
+      <point x="50.25" y="367.0" />
+      <point x="66.625" y="367.0" />
+      <point x="66.625" y="171.0" />
+      <point x="368.4583333333333" y="171.0" />
+      <point x="-70.66666666666669" y="73.0" />
+    </edge>
+    <edge source="308f8bc0-2b1c-48b2-9ddf-ea6bf75b56ab.TABLE:store.public.order_lines" target="308f8bc0-2b1c-48b2-9ddf-ea6bf75b56ab.TABLE:store.public.order">
+      <point x="47.5" y="-59.0" />
+      <point x="520.75" y="367.0" />
+      <point x="654.625" y="367.0" />
+      <point x="0.0" y="59.5" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="1.0" x="378.0" y="255.0" />
+  <SelectedNodes>
+    <node>308f8bc0-2b1c-48b2-9ddf-ea6bf75b56ab.TABLE:store.public.order</node>
+  </SelectedNodes>
+  <Categories>
+    <Category>Key columns</Category>
+    <Category>Columns</Category>
+  </Categories>
+</Diagram>
+

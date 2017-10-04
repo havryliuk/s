@@ -5,7 +5,7 @@
 </head>
 <body>
 New product added.<br><br>
-${product.getDescription()}<br>Price: ${product.getPrice()}<br>Category: ${product.getCategory()}<br>
+${product.getDescription()}<br>Price: ${product.getPrice()}<br>Category: ${product.getCategory()}<br><br>
 <a href="adminMain">Go back</a><br>
 </body>
 </html>

@@ -8,9 +8,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.log4j.Logger;
+
 import com.havryliuk.entity.Customer;
 
 public class CustomerDao implements GenericStoreDao<Customer> {
+    private static final Logger LOG = Logger.getLogger(CustomerDao.class);
     private Connection connection;
 
     CustomerDao(Connection connection) {
@@ -29,7 +32,7 @@ public class CustomerDao implements GenericStoreDao<Customer> {
                 customers.add(Customer.builder().id(id).name(name).blocked(blocked).build());
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error(e);
         }
         return customers;
     }
@@ -57,7 +60,7 @@ public class CustomerDao implements GenericStoreDao<Customer> {
                 return Optional.ofNullable(Customer.builder().id(id).name(name).blocked(blocked).build());
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error(e);
         }
         return customer;
     }
@@ -71,7 +74,7 @@ public class CustomerDao implements GenericStoreDao<Customer> {
             statement.setInt(2, customer.getId());
             count = statement.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error(e);
         }
         return count > 0;
     }

@@ -11,10 +11,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.log4j.Logger;
+
 import com.havryliuk.entity.Order;
 import com.havryliuk.entity.Product;
 
 public class OrderDao implements GenericStoreDao<Order> {
+    private static final Logger LOG = Logger.getLogger(OrderDao.class);
     private Connection connection;
 
     OrderDao(Connection connection) {
@@ -38,7 +41,7 @@ public class OrderDao implements GenericStoreDao<Order> {
                 orders.add(Order.builder().id(orderId).paid(paid).build());
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error(e);
         }
         return orders;
     }
@@ -48,6 +51,8 @@ public class OrderDao implements GenericStoreDao<Order> {
         int id = -1;
         try (PreparedStatement statement = connection.prepareStatement("INSERT INTO public.order (customer_id, paid)" +
                 " VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS)) {
+
+            connection.setAutoCommit(false);
             statement.setInt(1, order.getCustomer().getId());
             statement.setBoolean(2, order.isPaid());
             statement.executeUpdate();
@@ -56,40 +61,68 @@ public class OrderDao implements GenericStoreDao<Order> {
                 id = rs.getInt(1);
                 order.setId(id);
             } else {
+                connection.rollback();
                 return id;
             }
 
-            for (Map.Entry<Product, Integer> row : order.getProducts().entrySet()) {
-                int productId = row.getKey().getId();
-                try (PreparedStatement linesStatement = connection.prepareStatement("INSERT INTO order_lines " +
-                        "(order_id, product_id, quantity) VALUES (?, ?, ?)")) {
-                    linesStatement.setInt(1, order.getId());
-                    linesStatement.setInt(2, productId);
-                    linesStatement.setInt(3, row.getValue());
-                    int result = linesStatement.executeUpdate();
-                    if (result <= 0) {
-                        return -1;
-                    }
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+            if (!insertOrderLines(order)) {
+                connection.rollback();
+                return -1;
             }
 
-            try (PreparedStatement deleteCartStatement = connection.prepareStatement("DELETE FROM cart WHERE " +
-                    "customer_id=?")) {
-                deleteCartStatement.setInt(1, order.getCustomer().getId());
-                int result = deleteCartStatement.executeUpdate();
-                if (result <= 0) {
-                    return -1;
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
+            if (!deleteCartEntries(order)) {
+                connection.rollback();
+                return -1;
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            try {
+                connection.rollback();
+            } catch (SQLException e1) {
+                LOG.error(e1);
+            }
+            LOG.error(e);
+        }
+        try {
+            connection.commit();
+            connection.setAutoCommit(true);
+        } catch (SQLException e) {
+            LOG.error(e);
         }
         return id;
+    }
+
+    private boolean deleteCartEntries(Order order) {
+        try (PreparedStatement deleteCartStatement = connection.prepareStatement("DELETE FROM cart WHERE " +
+                "customer_id=?")) {
+            deleteCartStatement.setInt(1, order.getCustomer().getId());
+            int result = deleteCartStatement.executeUpdate();
+            if (result <= 0) {
+                return false;
+            }
+        } catch (SQLException e) {
+            LOG.error(e);
+        }
+        return true;
+    }
+
+    private boolean insertOrderLines(Order order) {
+        for (Map.Entry<Product, Integer> row : order.getProducts().entrySet()) {
+            int productId = row.getKey().getId();
+            try (PreparedStatement linesStatement = connection.prepareStatement("INSERT INTO order_lines " +
+                    "(order_id, product_id, quantity) VALUES (?, ?, ?)")) {
+                linesStatement.setInt(1, order.getId());
+                linesStatement.setInt(2, productId);
+                linesStatement.setInt(3, row.getValue());
+                int result = linesStatement.executeUpdate();
+                if (result <= 0) {
+                    return false;
+                }
+            } catch (SQLException e) {
+                LOG.error(e);
+            }
+        }
+        return true;
     }
 
     @Override
@@ -109,7 +142,7 @@ public class OrderDao implements GenericStoreDao<Order> {
                 return Optional.ofNullable(Order.builder().id(id).paid(paid).products(orderLines).build());
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error(e);
         }
         return Optional.empty();
     }
@@ -129,7 +162,7 @@ public class OrderDao implements GenericStoreDao<Order> {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error(e);
         }
 
         return orderLines;
@@ -150,7 +183,7 @@ public class OrderDao implements GenericStoreDao<Order> {
                 return true;
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error(e);
         }
         return false;
     }

@@ -8,8 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.havryliuk.controller.command.Command;
 import com.havryliuk.entity.Product;
 import com.havryliuk.entity.ProductCategory;
-import com.havryliuk.dao.DaoFactory;
-import com.havryliuk.dao.ProductDao;
+import com.havryliuk.service.ProductService;
 
 public class UpdateProductCommand implements Command {
     @Override
@@ -20,8 +19,7 @@ public class UpdateProductCommand implements Command {
         ProductCategory category = ProductCategory.valueOf(request.getParameter("category").toUpperCase());
         Product product = Product.builder().id(id).description(description).price(price).category(category).build();
 
-        ProductDao dao = new DaoFactory().getProductDao();
-        boolean result = dao.update(product);
+        boolean result = new ProductService().updateProduct(product);
         if (result) {
             request.setAttribute("product", product);
             return "productSaved.jsp";
