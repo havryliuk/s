@@ -24,7 +24,7 @@
 </label><br>
     <input type="submit" value="Create">
 </form>
-<br><br>
+<br>
 <a href="adminMain">Go back</a>
 </body>
 </html>

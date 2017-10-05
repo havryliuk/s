@@ -1,8 +1,6 @@
 package com.havryliuk.controller.servlet;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -10,34 +8,34 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.havryliuk.controller.command.Command;
+import org.apache.log4j.Logger;
 
-import static com.havryliuk.controller.servlet.RequestUrlToCommandMapping.GET_REQUESTS_URL_COMMAND_MAPPING;
-import static com.havryliuk.controller.servlet.RequestUrlToCommandMapping.POST_REQUESTS_URL_COMMAND_MAPPING;
+import com.havryliuk.controller.command.Command;
 
 @WebServlet("/store/*")
 public class StoreServlet extends HttpServlet {
+    private static final Logger LOG = Logger.getLogger(StoreServlet.class);
+
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) {
-        processRequest(request, response, GET_REQUESTS_URL_COMMAND_MAPPING);
+        processRequest(request, response, HttpMethod.GET);
     }
 
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) {
-        processRequest(request, response, POST_REQUESTS_URL_COMMAND_MAPPING);
+        processRequest(request, response, HttpMethod.POST);
     }
 
-    private void processRequest(HttpServletRequest request, HttpServletResponse response, Map<String, Command>
-            mapping) {
-        Command command = mapping.get(request.getRequestURI()
+    private void processRequest(HttpServletRequest request, HttpServletResponse response, HttpMethod method) {
+        String uri = request.getRequestURI()
                 .replace("/store/", "")
-                .replaceAll("/\\d+", ""));
-        String pageName = command.execute(request, response);
-
+                .replaceAll("/\\d+", "");
         try {
+            Command command = RequestUrlToCommandMapping.getCommandByUri(uri, method);
+            String pageName = command.execute(request, response);
             request.getRequestDispatcher("/WEB-INF/view/" + pageName).forward(request, response);
-        } catch (ServletException | IOException e) {
-            e.printStackTrace();
+        } catch (ServletException | IOException | UnsupportedHttpMethodException e) {
+            LOG.error(e);
         }
     }
 }

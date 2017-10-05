@@ -24,7 +24,7 @@
 </c:forEach>
     </table>
     <br>
-    <label>Total: ${total}</label><br>
+    <label>Total: ${total}</label><br><br>
     <input type="submit" ${order.isPaid() ? "hidden" : ""} value="Pay this order"
            formmethod="post" formaction="../payOrder/${order.getId()}">
 </form>

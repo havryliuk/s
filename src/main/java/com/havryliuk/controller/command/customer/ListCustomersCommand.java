@@ -7,14 +7,16 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.havryliuk.controller.command.Command;
 import com.havryliuk.entity.Customer;
-import com.havryliuk.dao.DaoFactory;
-import com.havryliuk.dao.CustomerDao;
+import com.havryliuk.service.CustomerService;
 
+import lombok.Setter;
+
+@Setter
 public class ListCustomersCommand implements Command {
+    private CustomerService customerService;
     @Override
     public String execute(HttpServletRequest request, HttpServletResponse response) {
-        CustomerDao dao = new DaoFactory().getCustomerDao();
-        List<Customer> customers = dao.findAll();
+        List<Customer> customers = customerService.getAllCustomers();
         request.setAttribute("customers", customers);
 
         return "customerList.jsp";

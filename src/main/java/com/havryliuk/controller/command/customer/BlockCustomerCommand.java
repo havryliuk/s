@@ -10,24 +10,28 @@ import com.havryliuk.controller.command.CommonCommand;
 import com.havryliuk.entity.Customer;
 import com.havryliuk.service.CustomerService;
 
+import lombok.Setter;
+
+@Setter
 public class BlockCustomerCommand extends CommonCommand implements Command {
+    private CustomerService customerService;
+
     @Override
     public String execute(HttpServletRequest request, HttpServletResponse response) {
         boolean result;
 
         int id = Integer.parseInt(request.getParameter("id"));
-        CustomerService service = new CustomerService();
-        Optional<Customer> customer = service.getCustomerById(id);
+        Optional<Customer> customer = customerService.getCustomerById(id);
         boolean blocked;
         if (customer.isPresent()) {
             blocked = customer.get().isBlocked();
             if (!blocked) {
-                result = service.blockCustomer(id);
+                result = customerService.blockCustomer(id);
             } else {
-                result = service.unblockCustomer(id);
+                result = customerService.unblockCustomer(id);
             }
 
-            request.setAttribute("customer", service.getCustomerById(id));
+            request.setAttribute("customer", customerService.getCustomerById(id));
             if (result) {
                 return "customerBlocked.jsp";
             } else {

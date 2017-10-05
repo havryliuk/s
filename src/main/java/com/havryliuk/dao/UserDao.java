@@ -5,14 +5,17 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.apache.log4j.Logger;
+
 public class UserDao {
+    private static final Logger LOG = Logger.getLogger(UserDao.class);
     private Connection connection;
 
     UserDao(Connection connection) {
         this.connection = connection;
     }
 
-    public UserType getType(String username, String password) {
+    public UserType getUserType(String username, String password) {
         UserType type = null;
         try (PreparedStatement statement = connection.prepareStatement("SELECT type FROM public.user" +
                 " WHERE username=? AND password=?")) {
@@ -26,7 +29,7 @@ public class UserDao {
                 type = null;
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error(e);
         }
         return type;
     }
@@ -41,9 +44,8 @@ public class UserDao {
                 id = rs.getInt("id");
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error(e);
         }
-
         return id;
     }
 }

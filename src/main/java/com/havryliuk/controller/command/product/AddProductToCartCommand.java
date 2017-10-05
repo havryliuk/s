@@ -13,19 +13,26 @@ import com.havryliuk.service.CartService;
 import com.havryliuk.service.CustomerService;
 import com.havryliuk.service.ProductService;
 
+import lombok.Setter;
+
+@Setter
 public class AddProductToCartCommand implements Command {
+    private ProductService productService;
+    private CustomerService customerService;
+    private CartService cartService;
+
     @Override
     public String execute(HttpServletRequest request, HttpServletResponse response) {
         int productId = Integer.parseInt(request.getParameter("id"));
         int quantity = Integer.parseInt(request.getParameter("quantity"));
         int customerId = (int) request.getSession().getAttribute("userId");
 
-        Optional<Product> product = new ProductService().getProductById(productId);
-        Optional<Customer> customer = new CustomerService().getCustomerById(customerId);
+        Optional<Product> product = productService.getProductById(productId);
+        Optional<Customer> customer = customerService.getCustomerById(customerId);
 
         if (product.isPresent() && customer.isPresent()) {
             CartEntry cartEntry = new CartEntry(customer.get(), product.get(), quantity);
-            if (new CartService().addProductToCart(cartEntry)) {
+            if (cartService.addProductToCart(cartEntry)) {
                 request.setAttribute("cartEntry", cartEntry);
                 return "addedToCart.jsp";
             }

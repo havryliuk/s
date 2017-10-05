@@ -40,9 +40,11 @@ public class CartDao implements GenericStoreDao<CartEntry> {
         return entries;
     }
 
-    public boolean recordForProductIdExists(int id) {
-        try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM cart where product_id=?")) {
-            statement.setInt(1, id);
+    public boolean recordForProductAndCustomerExists(int customerId, int productId) {
+        try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM cart where product_id=?" +
+                " AND customer_id=?")) {
+            statement.setInt(1, productId);
+            statement.setInt(2, customerId);
             ResultSet rs = statement.executeQuery();
             if (rs.next()) {
                 return true;

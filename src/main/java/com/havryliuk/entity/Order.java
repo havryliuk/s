@@ -4,9 +4,11 @@ import java.util.Map;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 
 @Getter
+@Setter
 @Builder
 @ToString
 public class Order {
@@ -14,8 +16,4 @@ public class Order {
     private Map<Product, Integer> products;
     private Customer customer;
     private boolean paid = false;
-
-    public void setId(int id) {
-        this.id = id;
-    }
 }

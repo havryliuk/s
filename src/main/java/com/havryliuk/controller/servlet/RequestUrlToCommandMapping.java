@@ -1,58 +1,78 @@
 package com.havryliuk.controller.servlet;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import com.havryliuk.controller.command.order.CartCommand;
-import com.havryliuk.controller.command.order.ListOrdersCommand;
-import com.havryliuk.controller.command.order.OrderCommand;
-import com.havryliuk.controller.command.order.PayOrderCommand;
-import com.havryliuk.controller.command.order.SubmitOrderCommand;
-import com.havryliuk.controller.command.product.AddProductCommand;
-import com.havryliuk.controller.command.customer.BlockCustomerCommand;
 import com.havryliuk.controller.command.Command;
-import com.havryliuk.controller.command.customer.CustomerCommand;
 import com.havryliuk.controller.command.customer.ListCustomersCommand;
-import com.havryliuk.controller.command.product.AddProductToCartCommand;
-import com.havryliuk.controller.command.product.ListProductsCommand;
-import com.havryliuk.controller.command.LoginCommand;
 import com.havryliuk.controller.command.MainCommand;
-import com.havryliuk.controller.command.product.ProductCommand;
 import com.havryliuk.controller.command.SamePageCommand;
-import com.havryliuk.controller.command.product.UpdateProductCommand;
+
+import static com.havryliuk.controller.command.CommandFactory.addProductCommand;
+import static com.havryliuk.controller.command.CommandFactory.addProductToCartCommand;
+import static com.havryliuk.controller.command.CommandFactory.blockCustomerCommand;
+import static com.havryliuk.controller.command.CommandFactory.cartCommand;
+import static com.havryliuk.controller.command.CommandFactory.customerCommand;
+import static com.havryliuk.controller.command.CommandFactory.listOrdersCommand;
+import static com.havryliuk.controller.command.CommandFactory.listProductsCommand;
+import static com.havryliuk.controller.command.CommandFactory.loginCommand;
+import static com.havryliuk.controller.command.CommandFactory.orderCommand;
+import static com.havryliuk.controller.command.CommandFactory.payOrderCommand;
+import static com.havryliuk.controller.command.CommandFactory.productCommand;
+import static com.havryliuk.controller.command.CommandFactory.submitOrderCommand;
+import static com.havryliuk.controller.command.CommandFactory.updateProductCommand;
 
 final class RequestUrlToCommandMapping {
-    final static Map<String, Command> GET_REQUESTS_URL_COMMAND_MAPPING = new HashMap<>();
+    static Command getCommandByUri(String uri, HttpMethod method) throws UnsupportedHttpMethodException {
+        if (SAME_PAGE.contains(uri)) {
+            return new SamePageCommand();
+        }
+        if (method == HttpMethod.GET) {
+            return GET.get(uri);
+        }
+        if (method == HttpMethod.POST) {
+            return POST.get(uri);
+        }
+        throw new UnsupportedHttpMethodException("Unsupported HTTP method : " + method + " for URI: " + uri);
+    }
 
     private RequestUrlToCommandMapping() {
         throw new IllegalAccessError("Utilities class. Cannot be instantiated.");
     }
+
+    private static final List<String> SAME_PAGE = new ArrayList<>();
     static {
-        GET_REQUESTS_URL_COMMAND_MAPPING.put("", new MainCommand());
-        GET_REQUESTS_URL_COMMAND_MAPPING.put("productList", new ListProductsCommand());
-        GET_REQUESTS_URL_COMMAND_MAPPING.put("product", new ProductCommand());
-        GET_REQUESTS_URL_COMMAND_MAPPING.put("adminMain", new SamePageCommand());
-        GET_REQUESTS_URL_COMMAND_MAPPING.put("addProduct", new SamePageCommand());
-        GET_REQUESTS_URL_COMMAND_MAPPING.put("productAdded", new SamePageCommand());
-        GET_REQUESTS_URL_COMMAND_MAPPING.put("invalidProductData", new SamePageCommand());
-        GET_REQUESTS_URL_COMMAND_MAPPING.put("product", new ProductCommand());
-        GET_REQUESTS_URL_COMMAND_MAPPING.put("productSaved", new SamePageCommand());
-        GET_REQUESTS_URL_COMMAND_MAPPING.put("customerList", new ListCustomersCommand());
-        GET_REQUESTS_URL_COMMAND_MAPPING.put("customer", new CustomerCommand());
-        GET_REQUESTS_URL_COMMAND_MAPPING.put("customerMain", new SamePageCommand());
-        GET_REQUESTS_URL_COMMAND_MAPPING.put("index", new SamePageCommand());
-        GET_REQUESTS_URL_COMMAND_MAPPING.put("cart", new CartCommand());
-        GET_REQUESTS_URL_COMMAND_MAPPING.put("orders", new ListOrdersCommand());
-        GET_REQUESTS_URL_COMMAND_MAPPING.put("order", new OrderCommand());
+        SAME_PAGE.add("adminMain");
+        SAME_PAGE.add("productAdded");
+        SAME_PAGE.add("invalidProductData");
+        SAME_PAGE.add("productSaved");
+        SAME_PAGE.add("customerMain");
+        SAME_PAGE.add("index");
     }
-    final static Map<String, Command> POST_REQUESTS_URL_COMMAND_MAPPING = new HashMap<>();
+
+    private static final Map<String, Command> GET = new HashMap<>();
     static {
-        POST_REQUESTS_URL_COMMAND_MAPPING.put("main", new LoginCommand());
-        POST_REQUESTS_URL_COMMAND_MAPPING.put("addProduct", new AddProductCommand());
-        POST_REQUESTS_URL_COMMAND_MAPPING.put("productUpdated", new UpdateProductCommand());
-        POST_REQUESTS_URL_COMMAND_MAPPING.put("customerBlock", new BlockCustomerCommand());
-        POST_REQUESTS_URL_COMMAND_MAPPING.put("addedToCart", new AddProductToCartCommand());
-        POST_REQUESTS_URL_COMMAND_MAPPING.put("submitOrder", new SubmitOrderCommand());
-        POST_REQUESTS_URL_COMMAND_MAPPING.put("payOrder", new PayOrderCommand());
+        GET.put("", new MainCommand());
+        GET.put("productList", listProductsCommand());
+        GET.put("product", productCommand());
+        GET.put("product", productCommand());
+        GET.put("customerList", new ListCustomersCommand());
+        GET.put("customer", customerCommand());
+        GET.put("cart", cartCommand());
+        GET.put("orders", listOrdersCommand());
+        GET.put("order", orderCommand());
+    }
+
+    private static final Map<String, Command> POST = new HashMap<>();
+    static {
+        POST.put("main", loginCommand());
+        POST.put("addProduct", addProductCommand());
+        POST.put("productUpdated", updateProductCommand());
+        POST.put("customerBlock", blockCustomerCommand());
+        POST.put("addedToCart", addProductToCartCommand());
+        POST.put("submitOrder", submitOrderCommand());
+        POST.put("payOrder", payOrderCommand());
     }
 }

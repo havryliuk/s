@@ -10,10 +10,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.log4j.Logger;
+
 import com.havryliuk.entity.Product;
 import com.havryliuk.entity.ProductCategory;
 
 public class ProductDao implements GenericStoreDao<Product> {
+    private static final Logger LOG = Logger.getLogger(ProductDao.class);
     private Connection connection;
 
     ProductDao(Connection connection) {
@@ -35,7 +38,7 @@ public class ProductDao implements GenericStoreDao<Product> {
                 products.add(product);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error(e);
         }
         return products;
     }
@@ -56,7 +59,7 @@ public class ProductDao implements GenericStoreDao<Product> {
                 product.setId(id);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error(e);
         }
         return id;
     }
@@ -80,8 +83,9 @@ public class ProductDao implements GenericStoreDao<Product> {
                         (category).build());
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error(e);
         }
+        LOG.info("Product ID not found: " + id);
         return Optional.empty();
     }
 
@@ -96,7 +100,7 @@ public class ProductDao implements GenericStoreDao<Product> {
             statement.setInt(4, product.getId());
             count = statement.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error(e);
         }
         return count > 0;
     }

@@ -155,7 +155,7 @@ public class OrderDao implements GenericStoreDao<Order> {
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
                 int productId = rs.getInt("product_id");
-                Optional<Product> product = new DaoFactory().getProductDao().find(productId);
+                Optional<Product> product = DaoFactory.getProductDao().find(productId);
                 if (product.isPresent()) {
                     int quantity = rs.getInt("quantity");
                     orderLines.put(product.get(), quantity);

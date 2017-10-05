@@ -1,5 +1,6 @@
 package com.havryliuk.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.apache.log4j.Logger;
@@ -9,7 +10,17 @@ import com.havryliuk.dao.CustomerDao;
 import com.havryliuk.dao.DaoFactory;
 
 public class CustomerService {
-    private final static Logger LOG = Logger.getLogger(CustomerService.class);
+    private static final Logger LOG = Logger.getLogger(CustomerService.class);
+    private static CustomerService instance;
+
+    private CustomerService() {}
+
+    public static CustomerService getInstance() {
+        if (instance == null) {
+            instance = new CustomerService();
+        }
+        return instance;
+    }
 
     public boolean blockCustomer(int id) {
         return setCustomerBlocked(id, true);
@@ -20,12 +31,15 @@ public class CustomerService {
     }
 
     public Optional<Customer> getCustomerById(int id) {
-        CustomerDao dao = new DaoFactory().getCustomerDao();
-        return dao.find(id);
+        return DaoFactory.getCustomerDao().find(id);
+    }
+
+    public List<Customer> getAllCustomers() {
+        return DaoFactory.getCustomerDao().findAll();
     }
 
     private boolean setCustomerBlocked(int id, boolean blocked) {
-        CustomerDao dao = new DaoFactory().getCustomerDao();
+        CustomerDao dao = DaoFactory.getCustomerDao();
         Optional<Customer> customer = dao.find(id);
         if (customer.isPresent()) {
             customer.get().setBlocked(blocked);

@@ -10,12 +10,17 @@ import com.havryliuk.controller.command.Command;
 import com.havryliuk.entity.Order;
 import com.havryliuk.service.OrderService;
 
+import lombok.Setter;
+
+@Setter
 public class ListOrdersCommand extends AbstractOrderCommand implements Command {
+    private OrderService orderService;
+
     @Override
     public String execute(HttpServletRequest request, HttpServletResponse response) {
         List<Order> orders = new ArrayList<>();
         int customerId = getCustomerIdFromSession(request);
-        orders.addAll(new OrderService().getOrdersForCustomer(customerId));
+        orders.addAll(orderService.getOrdersForCustomer(customerId));
         request.setAttribute("orders", orders);
         return "orders.jsp";
     }

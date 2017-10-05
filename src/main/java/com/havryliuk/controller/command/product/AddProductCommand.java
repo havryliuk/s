@@ -8,10 +8,13 @@ import javax.servlet.http.HttpServletResponse;
 import com.havryliuk.controller.command.Command;
 import com.havryliuk.entity.Product;
 import com.havryliuk.entity.ProductCategory;
-import com.havryliuk.dao.DaoFactory;
-import com.havryliuk.dao.ProductDao;
+import com.havryliuk.service.ProductService;
 
+import lombok.Setter;
+
+@Setter
 public class AddProductCommand implements Command {
+    private ProductService productService;
 
     @Override
     public String execute(HttpServletRequest request, HttpServletResponse response) {
@@ -21,8 +24,7 @@ public class AddProductCommand implements Command {
 
         if (!description.isEmpty() && price.compareTo(new BigDecimal(0)) > 0) {
             Product product = Product.builder().category(category).price(price).description(description).build();
-            ProductDao dao = new DaoFactory().getProductDao();
-            int id = dao.save(product);
+            int id = productService.addProduct(product);
             if (id > 0) {
                 product.setId(id);
 

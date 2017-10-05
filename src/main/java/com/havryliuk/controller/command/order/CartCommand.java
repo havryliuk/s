@@ -10,11 +10,16 @@ import com.havryliuk.controller.command.Command;
 import com.havryliuk.entity.CartEntry;
 import com.havryliuk.service.CartService;
 
+import lombok.Setter;
+
+@Setter
 public class CartCommand extends AbstractOrderCommand implements Command {
+    private CartService cartService;
+
     @Override
     public String execute(HttpServletRequest request, HttpServletResponse response) {
         int customerId = getCustomerIdFromSession(request);
-        List<CartEntry> entries = new CartService().getCartForCustomer(customerId);
+        List<CartEntry> entries = cartService.getCartForCustomer(customerId);
         request.setAttribute("entries",
                 entries.stream().filter(entry -> entry.getQuantity() != 0).collect(Collectors.toList()));
         return "cart.jsp";

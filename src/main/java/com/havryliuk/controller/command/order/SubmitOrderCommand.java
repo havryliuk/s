@@ -17,17 +17,25 @@ import com.havryliuk.service.CartService;
 import com.havryliuk.service.CustomerService;
 import com.havryliuk.service.OrderService;
 
+import lombok.Setter;
+
+@Setter
 public class SubmitOrderCommand extends AbstractOrderCommand implements Command {
+    private CustomerService customerService;
+    private CartService cartService;
+    private OrderService orderService;
+
     @Override
     public String execute(HttpServletRequest request, HttpServletResponse response) {
         int customerId = getCustomerIdFromSession(request);
-        Optional<Customer> customer = new CustomerService().getCustomerById(customerId);
-        List<CartEntry> cartEntries = new CartService().getCartForCustomer(customerId);
-        Map<Product, Integer> orderLines = cartEntries.stream()
-                .collect(Collectors.toMap(CartEntry::getProduct, CartEntry::getQuantity));
+        Optional<Customer> customer = customerService.getCustomerById(customerId);
 
         if (customer.isPresent()) {
-            Optional<Order> order = new OrderService().createOrder(customer.get(), orderLines);
+            List<CartEntry> cartEntries = cartService.getCartForCustomer(customerId);
+            Map<Product, Integer> orderLines = cartEntries.stream()
+                    .collect(Collectors.toMap(CartEntry::getProduct, CartEntry::getQuantity));
+
+            Optional<Order> order = orderService.createOrder(customer.get(), orderLines);
             if (order.isPresent()) {
                 request.setAttribute("orderId", order.get().getId());
                 return "orderSubmitted.jsp";

@@ -10,11 +10,16 @@ import com.havryliuk.entity.Product;
 import com.havryliuk.dao.UserType;
 import com.havryliuk.service.ProductService;
 
+import lombok.Setter;
+
+@Setter
 public class ProductCommand implements Command {
+    private ProductService productService;
+
     @Override
     public String execute(HttpServletRequest request, HttpServletResponse response) {
         int id = Integer.parseInt(request.getRequestURI().replaceAll("\\D+", ""));
-        Optional<Product> product = new ProductService().getProductById(id);
+        Optional<Product> product = productService.getProductById(id);
         if (product.isPresent()) {
             request.setAttribute("product", product.get());
             String userType = request.getSession().getAttribute("userType").toString();
