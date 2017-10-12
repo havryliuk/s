@@ -13,6 +13,7 @@ import com.havryliuk.controller.command.product.AddProductToCartCommand;
 import com.havryliuk.controller.command.product.ListProductsCommand;
 import com.havryliuk.controller.command.product.ProductCommand;
 import com.havryliuk.controller.command.product.UpdateProductCommand;
+import com.havryliuk.dao.DaoFactory;
 import com.havryliuk.service.CartService;
 import com.havryliuk.service.CustomerService;
 import com.havryliuk.service.OrderService;
@@ -24,31 +25,31 @@ public class CommandFactory {
 
     public static ProductCommand productCommand() {
         ProductCommand command = new ProductCommand();
-        command.setProductService(ProductService.getInstance());
+        command.setProductService(createProductService());
         return command;
     }
 
     public static UpdateProductCommand updateProductCommand() {
         UpdateProductCommand command = new UpdateProductCommand();
-        command.setProductService(ProductService.getInstance());
+        command.setProductService(createProductService());
         return command;
     }
 
     public static ListProductsCommand listProductsCommand() {
         ListProductsCommand command = new ListProductsCommand();
-        command.setProductService(ProductService.getInstance());
+        command.setProductService(createProductService());
         return command;
     }
 
     public static AddProductToCartCommand addProductToCartCommand() {
         AddProductToCartCommand command = new AddProductToCartCommand();
-        ProductService productService = ProductService.getInstance();
+        ProductService productService = createProductService();
         CustomerService customerService = CustomerService.getInstance();
 
         command.setProductService(productService);
         command.setCustomerService(customerService);
 
-        CartService cartService = CartService.getInstance();
+        CartService cartService = createCartService();
         cartService.setProductService(productService);
         cartService.setCustomerService(customerService);
         command.setCartService(cartService);
@@ -57,14 +58,14 @@ public class CommandFactory {
 
     public static SubmitOrderCommand submitOrderCommand() {
         CustomerService customerService = CustomerService.getInstance();
-        CartService cartService = CartService.getInstance();
+        CartService cartService = createCartService();
         cartService.setCustomerService(customerService);
-        cartService.setProductService(ProductService.getInstance());
+        cartService.setProductService(createProductService());
 
         SubmitOrderCommand command = new SubmitOrderCommand();
         command.setCartService(cartService);
         command.setCustomerService(customerService);
-        command.setOrderService(OrderService.getInstance());
+        command.setOrderService(createOrderService());
         return command;
     }
 
@@ -76,31 +77,33 @@ public class CommandFactory {
 
     public static ListOrdersCommand listOrdersCommand() {
         ListOrdersCommand command = new ListOrdersCommand();
-        command.setOrderService(OrderService.getInstance());
+        command.setOrderService(createOrderService());
         return command;
     }
 
     public static PayOrderCommand payOrderCommand() {
         PayOrderCommand command = new PayOrderCommand();
-        command.setOrderService(OrderService.getInstance());
+        command.setOrderService(createOrderService());
         return command;
     }
 
     public static OrderCommand orderCommand() {
         OrderCommand command = new OrderCommand();
-        command.setOrderService(OrderService.getInstance());
+        command.setOrderService(createOrderService());
         return command;
     }
 
     public static CartCommand cartCommand() {
         CartCommand command = new CartCommand();
-        command.setCartService(CartService.getInstance());
+        command.setCartService(createCartService());
         return command;
     }
 
     public static BlockCustomerCommand blockCustomerCommand() {
         BlockCustomerCommand command = new BlockCustomerCommand();
-        command.setCustomerService(CustomerService.getInstance());
+        CustomerService customerService = CustomerService.getInstance();
+        customerService.setCustomerDao(DaoFactory.getCustomerDao());
+        command.setCustomerService(customerService);
         return command;
     }
 
@@ -112,7 +115,7 @@ public class CommandFactory {
 
     public static AddProductCommand addProductCommand() {
         AddProductCommand command = new AddProductCommand();
-        command.setProductService(ProductService.getInstance());
+        command.setProductService(createProductService());
         return command;
     }
 
@@ -120,5 +123,23 @@ public class CommandFactory {
         LoginCommand command = new LoginCommand();
         command.setSecurityService(SecurityService.getInstance());
         return command;
+    }
+
+    private static ProductService createProductService() {
+        ProductService productService = ProductService.getInstance();
+        productService.setProductDao(DaoFactory.getProductDao());
+        return productService;
+    }
+
+    private static CartService createCartService() {
+        CartService cartService = CartService.getInstance();
+        cartService.setCartDao(DaoFactory.getCartDao());
+        return cartService;
+    }
+
+    private static OrderService createOrderService() {
+        OrderService orderService = OrderService.getInstance();
+        orderService.setOrderDao(DaoFactory.getOrderDao());
+        return orderService;
     }
 }

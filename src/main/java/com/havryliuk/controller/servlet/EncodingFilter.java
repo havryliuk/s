@@ -14,7 +14,7 @@ import javax.servlet.annotation.WebFilter;
 public class EncodingFilter implements Filter {
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-
+        //no init actions
     }
 
     @Override
@@ -25,6 +25,6 @@ public class EncodingFilter implements Filter {
 
     @Override
     public void destroy() {
-
+        //no destroy actions
     }
 }

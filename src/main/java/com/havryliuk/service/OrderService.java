@@ -9,11 +9,11 @@ import org.apache.log4j.Logger;
 import com.havryliuk.entity.Customer;
 import com.havryliuk.entity.Order;
 import com.havryliuk.entity.Product;
-import com.havryliuk.dao.DaoFactory;
 import com.havryliuk.dao.OrderDao;
 
 public class OrderService {
     private static OrderService instance;
+    private OrderDao orderDao;
     private static final Logger LOG = Logger.getLogger(OrderService.class);
 
     private OrderService() {}
@@ -27,8 +27,7 @@ public class OrderService {
 
     public Optional<Order> createOrder(Customer customer, Map<Product, Integer> products) {
         Order order = Order.builder().products(products).customer(customer).paid(false).build();
-        OrderDao dao = DaoFactory.getOrderDao();
-        int id = dao.save(order);
+        int id = orderDao.save(order);
         if (id > 0) {
             LOG.info("Created order: " + order);
             return Optional.ofNullable(order);
@@ -38,19 +37,20 @@ public class OrderService {
     }
 
     public List<Order> getOrdersForCustomer(int customerId) {
-        OrderDao dao = DaoFactory.getOrderDao();
-        return dao.findAllByCustomerId(customerId);
+        return orderDao.findAllByCustomerId(customerId);
     }
 
     public Optional<Order> getOrderById(int id) {
-        OrderDao dao = DaoFactory.getOrderDao();
-        return dao.find(id);
+        return orderDao.find(id);
     }
 
     public boolean payOrder(int id) {
-        OrderDao dao = DaoFactory.getOrderDao();
-        boolean result = dao.payOrder(id);
+        boolean result = orderDao.payOrder(id);
         LOG.info("Order ID: " + id + " " + (result ? "paid" : "not paid"));
         return result;
+    }
+
+    public void setOrderDao(OrderDao orderDao) {
+        this.orderDao = orderDao;
     }
 }

@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.havryliuk.controller.command.Command;
-import com.havryliuk.controller.command.customer.ListCustomersCommand;
 import com.havryliuk.controller.command.MainCommand;
 import com.havryliuk.controller.command.SamePageCommand;
 
@@ -27,17 +26,23 @@ import static com.havryliuk.controller.command.CommandFactory.updateProductComma
 
 final class RequestUrlToCommandMapping {
     static Command getCommandByUri(String uri, HttpMethod method) throws UnsupportedHttpMethodException {
+        Command command = null;
         if (method == HttpMethod.GET) {
             if (SAME_PAGE.contains(uri)) {
                 return new SamePageCommand();
             } else {
-                return GET.get(uri);
+                command = GET.get(uri);
             }
         }
         if (method == HttpMethod.POST) {
-            return POST.get(uri);
+            command = POST.get(uri);
         }
-        throw new UnsupportedHttpMethodException("Unsupported HTTP method : " + method + " for URI: " + uri);
+
+        if (command != null) {
+            return command;
+        } else {
+            throw new UnsupportedHttpMethodException("Unsupported HTTP method : " + method + " for URI: " + uri);
+        }
     }
 
     private RequestUrlToCommandMapping() {
@@ -61,7 +66,6 @@ final class RequestUrlToCommandMapping {
     static {
         GET.put("", new MainCommand());
         GET.put("productList", listProductsCommand());
-        GET.put("product", productCommand());
         GET.put("product", productCommand());
         GET.put("customerList", listCustomersCommand());
         GET.put("customer", customerCommand());

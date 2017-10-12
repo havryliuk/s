@@ -12,6 +12,7 @@ import com.havryliuk.dao.DaoFactory;
 public class CustomerService {
     private static final Logger LOG = Logger.getLogger(CustomerService.class);
     private static CustomerService instance;
+    private CustomerDao customerDao;
 
     private CustomerService() {}
 
@@ -38,12 +39,15 @@ public class CustomerService {
         return DaoFactory.getCustomerDao().findAll();
     }
 
+    public void setCustomerDao(CustomerDao customerDao) {
+        this.customerDao = customerDao;
+    }
+
     private boolean setCustomerBlocked(int id, boolean blocked) {
-        CustomerDao dao = DaoFactory.getCustomerDao();
-        Optional<Customer> customer = dao.find(id);
+        Optional<Customer> customer = customerDao.find(id);
         if (customer.isPresent()) {
             customer.get().setBlocked(blocked);
-            return dao.update(customer.get());
+            return customerDao.update(customer.get());
         }
         LOG.info("Customer ID: " + id + " not found.");
         return false;
