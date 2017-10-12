@@ -15,6 +15,7 @@ import static com.havryliuk.controller.command.CommandFactory.addProductToCartCo
 import static com.havryliuk.controller.command.CommandFactory.blockCustomerCommand;
 import static com.havryliuk.controller.command.CommandFactory.cartCommand;
 import static com.havryliuk.controller.command.CommandFactory.customerCommand;
+import static com.havryliuk.controller.command.CommandFactory.listCustomersCommand;
 import static com.havryliuk.controller.command.CommandFactory.listOrdersCommand;
 import static com.havryliuk.controller.command.CommandFactory.listProductsCommand;
 import static com.havryliuk.controller.command.CommandFactory.loginCommand;
@@ -26,11 +27,12 @@ import static com.havryliuk.controller.command.CommandFactory.updateProductComma
 
 final class RequestUrlToCommandMapping {
     static Command getCommandByUri(String uri, HttpMethod method) throws UnsupportedHttpMethodException {
-        if (SAME_PAGE.contains(uri)) {
-            return new SamePageCommand();
-        }
         if (method == HttpMethod.GET) {
-            return GET.get(uri);
+            if (SAME_PAGE.contains(uri)) {
+                return new SamePageCommand();
+            } else {
+                return GET.get(uri);
+            }
         }
         if (method == HttpMethod.POST) {
             return POST.get(uri);
@@ -43,8 +45,10 @@ final class RequestUrlToCommandMapping {
     }
 
     private static final List<String> SAME_PAGE = new ArrayList<>();
+
     static {
         SAME_PAGE.add("adminMain");
+        SAME_PAGE.add("addProduct");
         SAME_PAGE.add("productAdded");
         SAME_PAGE.add("invalidProductData");
         SAME_PAGE.add("productSaved");
@@ -53,12 +57,13 @@ final class RequestUrlToCommandMapping {
     }
 
     private static final Map<String, Command> GET = new HashMap<>();
+
     static {
         GET.put("", new MainCommand());
         GET.put("productList", listProductsCommand());
         GET.put("product", productCommand());
         GET.put("product", productCommand());
-        GET.put("customerList", new ListCustomersCommand());
+        GET.put("customerList", listCustomersCommand());
         GET.put("customer", customerCommand());
         GET.put("cart", cartCommand());
         GET.put("orders", listOrdersCommand());
@@ -66,6 +71,7 @@ final class RequestUrlToCommandMapping {
     }
 
     private static final Map<String, Command> POST = new HashMap<>();
+
     static {
         POST.put("main", loginCommand());
         POST.put("addProduct", addProductCommand());

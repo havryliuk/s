@@ -8,10 +8,13 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+@WebFilter("/store/*")
 public class SecurityFilter implements Filter {
+
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         //to be implemented
@@ -22,8 +25,10 @@ public class SecurityFilter implements Filter {
             throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
-        if (null == request.getAttribute("userId")) {
-            request.getRequestDispatcher("../..").forward(request, response);
+        if (!request.getRequestURI().contains("store/main") && null == request.getSession().getAttribute("userId")) {
+            request.getRequestDispatcher("/").forward(servletRequest, servletResponse);
+        } else {
+            filterChain.doFilter(request, response);
         }
     }
 

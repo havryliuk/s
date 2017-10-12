@@ -2,6 +2,7 @@ package com.havryliuk.controller.command;
 
 import com.havryliuk.controller.command.customer.BlockCustomerCommand;
 import com.havryliuk.controller.command.customer.CustomerCommand;
+import com.havryliuk.controller.command.customer.ListCustomersCommand;
 import com.havryliuk.controller.command.order.CartCommand;
 import com.havryliuk.controller.command.order.ListOrdersCommand;
 import com.havryliuk.controller.command.order.OrderCommand;
@@ -99,6 +100,12 @@ public class CommandFactory {
 
     public static BlockCustomerCommand blockCustomerCommand() {
         BlockCustomerCommand command = new BlockCustomerCommand();
+        command.setCustomerService(CustomerService.getInstance());
+        return command;
+    }
+
+    public static ListCustomersCommand listCustomersCommand() {
+        ListCustomersCommand command = new ListCustomersCommand();
         command.setCustomerService(CustomerService.getInstance());
         return command;
     }
