@@ -12,5 +12,6 @@ import lombok.ToString;
 public class Customer {
     private int id;
     private String name;
+    @Builder.Default
     private boolean blocked = false;
 }

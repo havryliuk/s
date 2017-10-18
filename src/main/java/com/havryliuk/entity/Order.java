@@ -17,5 +17,6 @@ public class Order {
     private int id;
     private Map<Product, Integer> products;
     private Customer customer;
+    @Builder.Default
     private boolean paid = false;
 }
