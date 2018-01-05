@@ -13,8 +13,6 @@ import com.havryliuk.store.entity.Customer;
 import com.havryliuk.store.entity.Product;
 import com.havryliuk.store.dao.CartDao;
 
-import lombok.Setter;
-
 @Service
 public class CartService {
     @Autowired

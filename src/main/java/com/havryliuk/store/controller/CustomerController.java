@@ -27,6 +27,7 @@ import com.havryliuk.store.view.ErrorViewWithMessage;
 @Controller
 @RequestMapping("/customer")
 public class CustomerController extends AbstractController {
+    private static final String CUSTOMER = "customer";
     private final CustomerService customerService;
     private final CartService cartService;
     private final OrderService orderService;
@@ -40,14 +41,14 @@ public class CustomerController extends AbstractController {
     @GetMapping("/list")
     public ModelAndView getCustomers() {
         List<Customer> customers = customerService.getAllCustomers();
-        return new ModelAndView("customer/list", "customers", customers);
+        return new ModelAndView(CUSTOMER + "/list", "customers", customers);
     }
 
     @GetMapping("/{id}")
     public ModelAndView getCustomer(@PathVariable("id") int id) {
         Optional<Customer> customer = customerService.getCustomerById(id);
         if (customer.isPresent()) {
-            return new ModelAndView("customer/customer", "customer", customer.get());
+            return new ModelAndView(CUSTOMER + "/customer", CUSTOMER, customer.get());
         } else {
             return customerIdNotFound(id);
         }
@@ -60,7 +61,7 @@ public class CustomerController extends AbstractController {
             if (!customer.get().isBlocked()) {
                 customerService.blockCustomer(id);
             }
-            return new ModelAndView("customer/blocked", "customer", customer);
+            return new ModelAndView(CUSTOMER + "/blocked", CUSTOMER, customer);
         } else {
             return customerIdNotFound(id);
         }
@@ -73,7 +74,7 @@ public class CustomerController extends AbstractController {
             if (customer.get().isBlocked()) {
                 customerService.unblockCustomer(id);
             }
-            return new ModelAndView("customer/unblocked", "customer", customer);
+            return new ModelAndView(CUSTOMER + "/unblocked", CUSTOMER, customer);
         } else {
             return customerIdNotFound(id);
         }
@@ -83,7 +84,7 @@ public class CustomerController extends AbstractController {
     public ModelAndView getCart(HttpServletRequest request) {
         int customerId = getCustomerIdFromSession(request);
         List<CartEntry> entries = cartService.getCartForCustomer(customerId);
-        return new ModelAndView("customer/cart", "entries",
+        return new ModelAndView(CUSTOMER + "/cart", "entries",
                 entries.stream().filter(entry -> entry.getQuantity() != 0).collect(Collectors.toList()));
     }
 
@@ -93,7 +94,7 @@ public class CustomerController extends AbstractController {
         int customerId = getCustomerIdFromSession(request);
         List<Order> customerOrders = orderService.getOrdersForCustomer(customerId);
         orders.addAll(customerOrders);
-        return new ModelAndView("customer/orders", "orders", orders);
+        return new ModelAndView(CUSTOMER + "/orders", "orders", orders);
     }
 
     private ModelAndView customerIdNotFound(int id) {

@@ -1,4 +1,4 @@
-package com.havryliuk.store.controller.command;
+package com.havryliuk.store.controller;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -18,18 +18,18 @@ import static org.mockito.Mockito.when;
 public class LoginControllerTest {
     @Test
     public void testAdminLogin() {
-        testLoginForUserType(UserType.ADMIN, "adminMain.jsp");
+        testLoginForUserType(UserType.ADMIN, "admin/main", "admin");
     }
 
     @Test
     public void testCustomerLogin() {
-        testLoginForUserType(UserType.CUSTOMER, "main.jsp");
+        testLoginForUserType(UserType.CUSTOMER, "customer/main", "user");
     }
 
-    private void testLoginForUserType(UserType userType, String expectedPage) {
+    private void testLoginForUserType(UserType userType, String expectedPage, String username) {
         HttpServletRequest request = mock(HttpServletRequest.class);
-        when(request.getParameter("username")).thenReturn("admin");
-        when(request.getParameter("password")).thenReturn("admin");
+        when(request.getParameter("username")).thenReturn(username);
+        when(request.getParameter("password")).thenReturn(username);
         HttpSession session = mock(HttpSession.class);
         when(request.getSession()).thenReturn(session);
 
@@ -37,8 +37,8 @@ public class LoginControllerTest {
         when(securityService.getUserType(anyString(), anyString())).thenReturn(userType);
         when(securityService.getUserIdByName(anyString())).thenReturn(1);
 
-        LoginController command = new LoginController(new SecurityService());
-        String page = command.authenticate(request);
+        LoginController controller = new LoginController(new SecurityService());
+        String page = controller.authenticate(request);
         assertThat(page).isEqualTo(expectedPage);
         verify(request).setAttribute("usertype", userType);
     }
