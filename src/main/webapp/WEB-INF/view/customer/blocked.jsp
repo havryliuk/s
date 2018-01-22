@@ -4,7 +4,7 @@
     <title>Customer blocked</title>
 </head>
 <body>
-<label>Customer ${customer.get().getName()} blocked!</label>
+<label>Customer ${customer.getName()} blocked!</label>
 <br><br>
 <a href="list">Back to customer list</a>
 </body>

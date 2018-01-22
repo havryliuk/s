@@ -1,51 +1,25 @@
 package com.havryliuk.store.dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 
-import org.apache.log4j.Logger;
+import com.havryliuk.store.dao.rowmapper.UserTypeRowMapper;
 
 public class UserDao {
-    private static final Logger LOG = Logger.getLogger(UserDao.class);
-    private Connection connection;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
-    UserDao(Connection connection) {
-        this.connection = connection;
+    public UserDao(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     public UserType getUserType(String username, String password) {
-        UserType type = null;
-        try (PreparedStatement statement = connection.prepareStatement("SELECT type FROM public.user" +
-                " WHERE username=? AND password=?")) {
-            statement.setString(1, username);
-            statement.setString(2, password);
-            if (statement.execute()) {
-                ResultSet rs = statement.executeQuery();
-                rs.next();
-                type = UserType.valueOf(rs.getString("type").toUpperCase());
-            } else {
-                type = null;
-            }
-        } catch (SQLException e) {
-            LOG.error(e);
-        }
-        return type;
+        return jdbcTemplate.queryForObject("SELECT type FROM public.user WHERE username=? AND password=?",
+                new UserTypeRowMapper(),
+                username, password);
     }
 
-    public int getIdByName(String name) {
-        int id = 0;
-        try (PreparedStatement statement = connection.prepareStatement("SELECT id FROM public.user" +
-                " WHERE username=?")) {
-            statement.setString(1, name);
-            ResultSet rs = statement.executeQuery();
-            if (rs.next()) {
-                id = rs.getInt("id");
-            }
-        } catch (SQLException e) {
-            LOG.error(e);
-        }
-        return id;
+    public Integer getIdByName(String name) {
+        return jdbcTemplate.queryForObject("SELECT id FROM public.user WHERE username=?", new Object[] {name}, Integer.class);
     }
 }

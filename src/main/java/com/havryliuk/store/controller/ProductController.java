@@ -2,7 +2,6 @@ package com.havryliuk.store.controller;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -42,13 +41,13 @@ public class ProductController extends AbstractController {
 
     @GetMapping("/{id}")
     public ModelAndView getProductById(HttpServletRequest request, @PathVariable("id") int id) {
-        Optional<Product> product = productService.getProductById(id);
-        if (product.isPresent()) {
+        Product product = productService.getProductById(id);
+        if (product != null) {
             UserType userType = UserType.valueOf(request.getSession().getAttribute("userType").toString());
             if (userType.equals(UserType.ADMIN)) {
-                return new ModelAndView("admin/product", PRODUCT, product.get());
+                return new ModelAndView("admin/product", PRODUCT, product);
             } else {
-                return new ModelAndView("customer/product", PRODUCT, product.get());
+                return new ModelAndView("customer/product", PRODUCT, product);
             }
         }
         return new ErrorViewWithMessage( "Product not found!");
@@ -106,10 +105,10 @@ public class ProductController extends AbstractController {
         if (quantity != 0) {
             int customerId = getCustomerIdFromSession(request);
 
-            Optional<Product> product = productService.getProductById(productId);
-            Optional<Customer> customer = customerService.getCustomerById(customerId);
-            if (product.isPresent() && customer.isPresent()) {
-                CartEntry cartEntry = new CartEntry(customer.get(), product.get(), quantity);
+            Product product = productService.getProductById(productId);
+            Customer customer = customerService.getCustomerById(customerId);
+            if (product != null && customer != null) {
+                CartEntry cartEntry = new CartEntry(customer, product, quantity);
                 if (cartService.addProductToCart(cartEntry)) {
                     return new ModelAndView(PRODUCT + "/addedToCart", "cartEntry", cartEntry);
                 } else {

@@ -1,67 +1,48 @@
 package com.havryliuk.store.dao;
 
-import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
 
+import com.havryliuk.store.dao.rowmapper.ProductRowMapper;
 import com.havryliuk.store.entity.Product;
-import com.havryliuk.store.entity.ProductCategory;
 
 public class ProductDao implements GenericStoreDao<Product> {
     private static final Logger LOG = Logger.getLogger(ProductDao.class);
-    private Connection connection;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
-    ProductDao(Connection connection) {
-        this.connection = connection;
+    public ProductDao(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     public List<Product> findAll() {
-        List<Product> products = new ArrayList<>();
-
-        try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM PRODUCT ORDER BY ID")) {
-            ResultSet rs = statement.executeQuery();
-            while (rs.next()) {
-                int id = rs.getInt("id");
-                String description = rs.getString("description");
-                BigDecimal price = rs.getBigDecimal("price");
-                ProductCategory category = ProductCategory.valueOf(rs.getString("category").trim());
-                Product product = Product.builder().id(id).description(description).price(price).category(category)
-                        .build();
-                products.add(product);
-            }
-        } catch (SQLException e) {
-            LOG.error(e);
-        }
-        return products;
+        String query = "SELECT * FROM PRODUCT ORDER BY ID";
+        return jdbcTemplate.query(query, new ProductRowMapper());
     }
 
     @Override
     public int save(Product product) {
-        int id = -1;
-        try (PreparedStatement statement = connection.prepareStatement(
-                "INSERT INTO PRODUCT (description, price, category) VALUES (?, ?, ?)",
-                Statement.RETURN_GENERATED_KEYS)) {
-            statement.setString(1, product.getDescription());
-            statement.setBigDecimal(2, product.getPrice());
-            statement.setString(3, product.getCategory().name());
-            statement.executeUpdate();
-            ResultSet rs = statement.getGeneratedKeys();
-            if (rs.next()) {
-                id = rs.getInt(1);
-                product.setId(id);
-            }
-        } catch (SQLException e) {
-            LOG.error(e);
-        }
-        return id;
+        String query = "INSERT INTO PRODUCT (description, price, category) VALUES (?, ?, ?)";
+        final PreparedStatementCreator preparedStatementCreator = connection -> {
+            final PreparedStatement preparedStatement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+            preparedStatement.setString(1, product.getDescription());
+            preparedStatement.setBigDecimal(2, product.getPrice());
+            preparedStatement.setString(3, product.getCategory().name());
+            return preparedStatement;
+        };
+        final GeneratedKeyHolder holder = new GeneratedKeyHolder();
+        jdbcTemplate.update(preparedStatementCreator, holder);
+        LOG.info("Product created: " + product.toString());
+        return Integer.parseInt(holder.getKeys().get("id").toString());
     }
 
     @Override
@@ -70,38 +51,19 @@ public class ProductDao implements GenericStoreDao<Product> {
     }
 
     @Override
-    public Optional<Product> find(int id) {
-        try (PreparedStatement statement = connection.prepareStatement(
-                "SELECT * FROM PRODUCT WHERE id = ?")) {
-            statement.setInt(1, id);
-            ResultSet rs = statement.executeQuery();
-            if (rs.next()) {
-                String description = rs.getString("description");
-                BigDecimal price = rs.getBigDecimal("price");
-                ProductCategory category = ProductCategory.valueOf(rs.getString("category").trim());
-                return Optional.ofNullable(Product.builder().id(id).description(description).price(price).category
-                        (category).build());
-            }
-        } catch (SQLException e) {
-            LOG.error(e);
-        }
-        LOG.info("Product ID not found: " + id);
-        return Optional.empty();
+    public Product find(int id) {
+        String query = "SELECT * FROM PRODUCT WHERE id = ?";
+        return jdbcTemplate.queryForObject(query, new ProductRowMapper(), id);
     }
 
     @Override
     public boolean update(Product product) {
-        int count = 0;
-        try (PreparedStatement statement = connection.prepareStatement(
-                "UPDATE PRODUCT SET description = ?, price = ?, category = ? WHERE id = ?")) {
-            statement.setString(1, product.getDescription());
-            statement.setBigDecimal(2, product.getPrice());
-            statement.setString(3, product.getCategory().toString());
-            statement.setInt(4, product.getId());
-            count = statement.executeUpdate();
-        } catch (SQLException e) {
-            LOG.error(e);
-        }
+        int count;
+        count = jdbcTemplate.update("UPDATE PRODUCT SET description = ?, price = ?, category = ? WHERE id = ?",
+                product.getDescription(),
+                product.getPrice(),
+                product.getCategory().toString(),
+                product.getId());
         return count > 0;
     }
 }

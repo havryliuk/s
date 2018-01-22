@@ -3,7 +3,6 @@ package com.havryliuk.store.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,15 +26,15 @@ public class CartService {
         int productId = newCartEntry.getProduct().getId();
         if (cartDao.recordForProductAndCustomerExists(customerId, productId)) {
             Map<String, Integer> cartEntryMap = cartDao.findByProductId(newCartEntry.getProduct().getId());
-            Optional<Product> product = productService.getProductById(cartEntryMap.get("productId"));
-            Optional<Customer> customer = customerService.getCustomerById(cartEntryMap.get("customerId"));
-            if (product.isPresent() && customer.isPresent()) {
-                CartEntry previous = new CartEntry(customer.get(), product.get(), cartEntryMap.get("quantity"));
+            Product product = productService.getProductById(cartEntryMap.get("productId"));
+            Customer customer = customerService.getCustomerById(cartEntryMap.get("customerId"));
+            if (product != null) {
+                CartEntry previous = new CartEntry(customer, product, cartEntryMap.get("quantity"));
                 int newQuantity = previous.getQuantity() + newCartEntry.getQuantity();
                 previous.setQuantity(newQuantity);
                 return cartDao.update(previous);
             }
-        }  else {
+        } else {
             return cartDao.save(newCartEntry) > 0;
         }
         return false;
@@ -45,11 +44,9 @@ public class CartService {
         List<CartEntry> entries = new ArrayList<>();
         for (Map.Entry<Integer, Integer> entry : cartDao.findAllByCustomerId(customerId).entrySet()) {
             int productId = entry.getKey();
-            Optional<Product> product = productService.getProductById(productId);
-            Optional<Customer> customer = customerService.getCustomerById(customerId);
-            if (product.isPresent() && customer.isPresent()) {
-                entries.add(new CartEntry(customer.get(), product.get(), entry.getValue()));
-            }
+            Product product = productService.getProductById(productId);
+            Customer customer = customerService.getCustomerById(customerId);
+            entries.add(new CartEntry(customer, product, entry.getValue()));
         }
         return entries;
     }

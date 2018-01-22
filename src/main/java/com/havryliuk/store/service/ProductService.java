@@ -22,8 +22,8 @@ public class ProductService {
         return id;
     }
 
-    public Optional<Product> getProductById(int id) {
-        Optional<Product> product;
+    public Product getProductById(int id) {
+        Product product;
         product = productDao.find(id);
         LOG.info("Found product: " + product);
         return product;

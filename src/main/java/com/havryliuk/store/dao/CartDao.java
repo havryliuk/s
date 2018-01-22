@@ -11,16 +11,20 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.havryliuk.store.entity.CartEntry;
 
 public class CartDao implements GenericStoreDao<CartEntry> {
     private static final String QUANTITY = "quantity";
     private static final Logger LOG = Logger.getLogger(CartDao.class);
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
     private Connection connection;
 
-    CartDao(Connection connection) {
-        this.connection = connection;
+    public CartDao(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     public Map<Integer, Integer> findAllByCustomerId(int id) {
@@ -80,8 +84,8 @@ public class CartDao implements GenericStoreDao<CartEntry> {
     }
 
     @Override
-    public Optional<CartEntry> find(int id) {
-        return Optional.empty();
+    public CartEntry find(int id) {
+        return null;
     }
 
     @Override

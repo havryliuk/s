@@ -4,7 +4,7 @@
     <title>Customer unblocked</title>
 </head>
 <body>
-<label>Customer ${customer.get().getName()} unblocked!</label>
+<label>Customer ${customer.getName()} unblocked!</label>
 <br><br>
 <a href="list">Back to customer list</a>
 </body>

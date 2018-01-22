@@ -9,19 +9,25 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.havryliuk.store.entity.Order;
 import com.havryliuk.store.entity.Product;
 
 public class OrderDao implements GenericStoreDao<Order> {
     private static final Logger LOG = Logger.getLogger(OrderDao.class);
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+    @Autowired
+    private ProductDao productDao;
     private Connection connection;
 
-    OrderDao(Connection connection) {
-        this.connection = connection;
+    public OrderDao(JdbcTemplate jdbcTemplate, ProductDao productDao) {
+        this.jdbcTemplate = jdbcTemplate;
+        this.productDao = productDao;
     }
 
     @Override
@@ -131,7 +137,7 @@ public class OrderDao implements GenericStoreDao<Order> {
     }
 
     @Override
-    public Optional<Order> find(int id) {
+    public Order find(int id) {
         boolean paid;
         try (PreparedStatement statement = connection.prepareStatement("SELECT paid FROM public.order WHERE id = ?")) {
             statement.setInt(1, id);
@@ -139,12 +145,12 @@ public class OrderDao implements GenericStoreDao<Order> {
             if (rs.next()) {
                 paid = rs.getBoolean("paid");
                 Map<Product, Integer> orderLines = getOrderLines(id);
-                return Optional.ofNullable(Order.builder().id(id).paid(paid).products(orderLines).build());
+                return Order.builder().id(id).paid(paid).products(orderLines).build();
             }
         } catch (SQLException e) {
             LOG.error(e);
         }
-        return Optional.empty();
+        return null;
     }
 
     private Map<Product, Integer> getOrderLines(int id) {
@@ -155,10 +161,10 @@ public class OrderDao implements GenericStoreDao<Order> {
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
                 int productId = rs.getInt("product_id");
-                Optional<Product> product = DaoFactory.getProductDao().find(productId);
-                if (product.isPresent()) {
+                Product product = productDao.find(productId);
+                if (product != null) {
                     int quantity = rs.getInt("quantity");
-                    orderLines.put(product.get(), quantity);
+                    orderLines.put(product, quantity);
                 }
             }
         } catch (SQLException e) {

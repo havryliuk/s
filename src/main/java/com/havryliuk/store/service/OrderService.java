@@ -32,7 +32,7 @@ public class OrderService {
         return orderDao.findAllByCustomerId(customerId);
     }
 
-    public Optional<Order> getOrderById(int id) {
+    public Order getOrderById(int id) {
         return orderDao.find(id);
     }
 

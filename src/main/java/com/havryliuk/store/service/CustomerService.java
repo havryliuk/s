@@ -1,7 +1,6 @@
 package com.havryliuk.store.service;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 import com.havryliuk.store.entity.Customer;
 import com.havryliuk.store.dao.CustomerDao;
-import com.havryliuk.store.dao.DaoFactory;
 
 @Service
 public class CustomerService {
@@ -17,29 +15,29 @@ public class CustomerService {
     @Autowired
     private CustomerDao customerDao;
 
-    public boolean blockCustomer(int id) {
-        return setCustomerBlocked(id, true);
+    public void blockCustomer(int id) {
+        setCustomerBlocked(id, true);
+        LOG.info("Customer ID: " + id + " blocked.");
     }
 
-    public boolean unblockCustomer(int id) {
-        return setCustomerBlocked(id, false);
+    public void unblockCustomer(int id) {
+        setCustomerBlocked(id, false);
+        LOG.info("Customer ID: " + id + " unblocked.");
     }
 
-    public Optional<Customer> getCustomerById(int id) {
-        return DaoFactory.getCustomerDao().find(id);
+    public Customer getCustomerById(int id) {
+        Customer customer = customerDao.find(id);
+        LOG.info("Customer found: " + customer);
+        return customer;
     }
 
     public List<Customer> getAllCustomers() {
-        return DaoFactory.getCustomerDao().findAll();
+        return customerDao.findAll();
     }
 
-    private boolean setCustomerBlocked(int id, boolean blocked) {
-        Optional<Customer> customer = customerDao.find(id);
-        if (customer.isPresent()) {
-            customer.get().setBlocked(blocked);
-            return customerDao.update(customer.get());
-        }
-        LOG.info("Customer ID: " + id + " not found.");
-        return false;
+    private void setCustomerBlocked(int id, boolean blocked) {
+        Customer customer = customerDao.find(id);
+        customer.setBlocked(blocked);
+        customerDao.update(customer);
     }
 }

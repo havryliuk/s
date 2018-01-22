@@ -4,8 +4,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.havryliuk.store.controller.LoginController;
+import com.havryliuk.store.dao.UserDao;
 import com.havryliuk.store.dao.UserType;
 import com.havryliuk.store.service.SecurityService;
 
@@ -16,6 +18,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class LoginControllerTest {
+    @Autowired
+    private UserDao userDao;
+
     @Test
     public void testAdminLogin() {
         testLoginForUserType(UserType.ADMIN, "admin/main", "admin");
@@ -37,7 +42,7 @@ public class LoginControllerTest {
         when(securityService.getUserType(anyString(), anyString())).thenReturn(userType);
         when(securityService.getUserIdByName(anyString())).thenReturn(1);
 
-        LoginController controller = new LoginController(new SecurityService());
+        LoginController controller = new LoginController(new SecurityService(userDao));
         String page = controller.authenticate(request);
         assertThat(page).isEqualTo(expectedPage);
         verify(request).setAttribute("usertype", userType);

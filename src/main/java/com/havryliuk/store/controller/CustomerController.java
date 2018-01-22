@@ -2,7 +2,6 @@ package com.havryliuk.store.controller;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
@@ -46,9 +45,9 @@ public class CustomerController extends AbstractController {
 
     @GetMapping("/{id}")
     public ModelAndView getCustomer(@PathVariable("id") int id) {
-        Optional<Customer> customer = customerService.getCustomerById(id);
-        if (customer.isPresent()) {
-            return new ModelAndView(CUSTOMER + "/customer", CUSTOMER, customer.get());
+        Customer customer = customerService.getCustomerById(id);
+        if (customer != null) {
+            return new ModelAndView(CUSTOMER + "/customer", CUSTOMER, customer);
         } else {
             return customerIdNotFound(id);
         }
@@ -56,9 +55,9 @@ public class CustomerController extends AbstractController {
 
     @PostMapping("/block")
     public ModelAndView block(@RequestParam("id") int id) {
-        Optional<Customer> customer = customerService.getCustomerById(id);
-        if (customer.isPresent()) {
-            if (!customer.get().isBlocked()) {
+        Customer customer = customerService.getCustomerById(id);
+        if (customer != null) {
+            if (!customer.isBlocked()) {
                 customerService.blockCustomer(id);
             }
             return new ModelAndView(CUSTOMER + "/blocked", CUSTOMER, customer);
@@ -69,9 +68,9 @@ public class CustomerController extends AbstractController {
 
     @PostMapping("/unblock")
     public ModelAndView unblock(@RequestParam("id") int id) {
-        Optional<Customer> customer = customerService.getCustomerById(id);
-        if (customer.isPresent()) {
-            if (customer.get().isBlocked()) {
+        Customer customer = customerService.getCustomerById(id);
+        if (customer != null) {
+            if (customer.isBlocked()) {
                 customerService.unblockCustomer(id);
             }
             return new ModelAndView(CUSTOMER + "/unblocked", CUSTOMER, customer);

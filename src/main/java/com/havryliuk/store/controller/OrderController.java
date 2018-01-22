@@ -40,9 +40,9 @@ public class OrderController extends AbstractController {
 
     @GetMapping("/{id}")
     public ModelAndView getOrder(@PathVariable("id") int id) {
-        Optional<Order> order = orderService.getOrderById(id);
-        if (order.isPresent()) {
-            return new ModelAndView("order/order", "order", order.get());
+        Order order = orderService.getOrderById(id);
+        if (order != null) {
+            return new ModelAndView("order/order", "order", order);
         } else {
             return new ErrorViewWithMessage("Order not found!");
         }
@@ -51,13 +51,13 @@ public class OrderController extends AbstractController {
     @PostMapping("/submit")
     public ModelAndView submitOrder(HttpServletRequest request) {
         int customerId = getCustomerIdFromSession(request);
-        Optional<Customer> customer = customerService.getCustomerById(customerId);
-        if (customer.isPresent()) {
+        Customer customer = customerService.getCustomerById(customerId);
+        if (customer != null) {
             List<CartEntry> cartEntries = cartService.getCartForCustomer(customerId);
             Map<Product, Integer> orderLines = cartEntries.stream()
                     .collect(Collectors.toMap(CartEntry::getProduct, CartEntry::getQuantity));
 
-            Optional<Order> order = orderService.createOrder(customer.get(), orderLines);
+            Optional<Order> order = orderService.createOrder(customer, orderLines);
             if (order.isPresent()) {
                 int orderId = order.get().getId();
                 return new ModelAndView("order/submitted", "orderId", orderId);
