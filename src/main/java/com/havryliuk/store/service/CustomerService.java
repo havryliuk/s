@@ -16,6 +16,10 @@ public class CustomerService {
     @Autowired
     private CustomerDao customerDao;
 
+    public CustomerService(CustomerDao customerDao) {
+        this.customerDao = customerDao;
+    }
+
     public void blockCustomer(int id) {
         setCustomerBlocked(id, true);
         LOG.info("Customer ID: " + id + " blocked.");

@@ -74,7 +74,7 @@ public class StoreConfig {
 
     @Bean
     public CustomerService customerService() {
-        return new CustomerService();
+        return new CustomerService(jdbcConfig.customerDao());
     }
 
     @Bean
@@ -84,6 +84,6 @@ public class StoreConfig {
 
     @Bean
     public CartService cartService() {
-        return new CartService();
+        return new CartService(jdbcConfig.cartDao());
     }
 }

@@ -2,7 +2,6 @@ package com.havryliuk.store.dao;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -13,7 +12,6 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public class CustomerDao implements GenericStoreDao<Customer> {
-    private static final Logger LOG = Logger.getLogger(CustomerDao.class);
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -28,13 +26,9 @@ public class CustomerDao implements GenericStoreDao<Customer> {
     }
 
     @Override
-    public boolean delete(Customer customer) {
-        return false;
-    }
-
-    @Override
     public Customer find(int id) {
-        return jdbcTemplate.queryForObject("SELECT * FROM customer WHERE user_id = " + id, new CustomerRowMapper());
+        String query = "SELECT * FROM customer WHERE user_id = ?";
+        return jdbcTemplate.queryForObject(query, new CustomerRowMapper(), id);
     }
 
     @Override
