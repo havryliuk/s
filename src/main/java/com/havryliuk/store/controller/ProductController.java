@@ -34,6 +34,7 @@ public class ProductController extends AbstractController {
     CustomerService customerService;
     @Autowired
     CartService cartService;
+
     @Autowired
     public ProductController(ProductService productService) {
         this.productService = productService;
@@ -50,7 +51,7 @@ public class ProductController extends AbstractController {
                 return new ModelAndView("customer/product", PRODUCT, product);
             }
         }
-        return new ErrorViewWithMessage( "Product not found!");
+        return new ErrorViewWithMessage("Product not found!");
     }
 
     @GetMapping("/list")
@@ -73,10 +74,11 @@ public class ProductController extends AbstractController {
             int id = productService.addProduct(product);
             if (id > 0) {
                 product.setId(id);
-                return new ModelAndView(PRODUCT+ "/created", PRODUCT, product);
+                return new ModelAndView(PRODUCT + "/created", PRODUCT, product);
             }
         } else {
-            return new ModelAndView(PRODUCT+ "/invalidData", ImmutableMap.of("description", description, "price", price));
+            return new ModelAndView(PRODUCT + "/invalidData", ImmutableMap.of("description", description, "price",
+                    price));
 
         }
         return new ModelAndView("error");
@@ -84,9 +86,9 @@ public class ProductController extends AbstractController {
 
     @PostMapping("/update")
     public ModelAndView update(@RequestParam("id") int id,
-                          @RequestParam("description") String description,
-                          @RequestParam("price") String stringPrice,
-                          @RequestParam("category") ProductCategory category) {
+                               @RequestParam("description") String description,
+                               @RequestParam("price") String stringPrice,
+                               @RequestParam("category") ProductCategory category) {
         BigDecimal price = new BigDecimal(stringPrice);
         Product product = Product.builder().id(id).description(description).price(price).category(category).build();
 
@@ -102,21 +104,25 @@ public class ProductController extends AbstractController {
     public ModelAndView addProductToCart(@RequestParam("id") int productId,
                                          @RequestParam("quantity") int quantity,
                                          HttpServletRequest request) {
-        if (quantity != 0) {
-            int customerId = getCustomerIdFromSession(request);
-
-            Product product = productService.getProductById(productId);
-            Customer customer = customerService.getCustomerById(customerId);
-            if (product != null && customer != null) {
-                CartEntry cartEntry = new CartEntry(customer, product, quantity);
-                if (cartService.addProductToCart(cartEntry)) {
-                    return new ModelAndView(PRODUCT + "/addedToCart", "cartEntry", cartEntry);
-                } else {
-                    return new ErrorViewWithMessage("Failed to add product to cart!");
-                }
-            }
-
+        if (quantity == 0) {
+            return new ErrorViewWithMessage("You cannot add to cart product of zero quantity!");
         }
-        return new ErrorViewWithMessage("You cannot add to cart product of zero quantity!");
+
+        int customerId = getCustomerIdFromSession(request);
+
+        Product product = productService.getProductById(productId);
+        Customer customer = customerService.getCustomerById(customerId);
+        if (product == null) {
+            return new ErrorViewWithMessage("Product ID: " + productId + " not found!");
+        }
+        if (customer == null) {
+            return new ErrorViewWithMessage("Customer ID: " + customerId + " not found!");
+        }
+        CartEntry cartEntry = new CartEntry(customer, product, quantity);
+        if (cartService.addProductToCart(cartEntry)) {
+            return new ModelAndView(PRODUCT + "/addedToCart", "cartEntry", cartEntry);
+        } else {
+            return new ErrorViewWithMessage("Failed to add product to cart!");
+        }
     }
 }

@@ -1,4 +1,4 @@
-package com.havryliuk.store;
+package com.havryliuk.store.spring;
 
 import javax.sql.DataSource;
 
@@ -7,7 +7,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import com.havryliuk.store.dao.CartDao;
 import com.havryliuk.store.dao.CustomerDao;
@@ -62,5 +64,12 @@ public class JdbcConfig {
     @Bean
     public UserDao userDao() {
         return new UserDao(jdbcTemplate(dataSource()));
+    }
+
+    @Bean
+    public PlatformTransactionManager transactionManager() {
+        DataSourceTransactionManager transactionManager = new DataSourceTransactionManager();
+        transactionManager.setDataSource(dataSource());
+        return transactionManager;
     }
 }

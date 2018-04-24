@@ -1,10 +1,9 @@
-package com.havryliuk.store;
+package com.havryliuk.store.spring;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
@@ -13,10 +12,6 @@ import com.havryliuk.store.controller.PagesController;
 import com.havryliuk.store.controller.CustomerController;
 import com.havryliuk.store.controller.OrderController;
 import com.havryliuk.store.controller.ProductController;
-import com.havryliuk.store.dao.CartDao;
-import com.havryliuk.store.dao.CustomerDao;
-import com.havryliuk.store.dao.OrderDao;
-import com.havryliuk.store.dao.ProductDao;
 import com.havryliuk.store.service.CartService;
 import com.havryliuk.store.service.CustomerService;
 import com.havryliuk.store.service.OrderService;
@@ -27,8 +22,12 @@ import com.havryliuk.store.service.SecurityService;
 @EnableWebMvc
 @ComponentScan(basePackages = {"com.havryliuk.store"})
 public class StoreConfig {
+    private final JdbcConfig jdbcConfig;
+
     @Autowired
-    private JdbcConfig jdbcConfig;
+    public StoreConfig(JdbcConfig jdbcConfig) {
+        this.jdbcConfig = jdbcConfig;
+    }
 
     @Bean
     public InternalResourceViewResolver internalResourceViewResolver() {

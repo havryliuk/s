@@ -7,12 +7,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.SessionAttributes;
 
 import com.havryliuk.store.dao.UserType;
 import com.havryliuk.store.service.SecurityService;
 
 @Controller
 @RequestMapping("/login")
+@SessionAttributes({"userType", "userId"})
 public class LoginController {
     private final SecurityService securityService;
 

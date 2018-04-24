@@ -1,6 +1,5 @@
 package com.havryliuk.store.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -89,10 +88,8 @@ public class CustomerController extends AbstractController {
 
     @GetMapping("/orders")
     public ModelAndView getCustomerOrders(HttpServletRequest request) {
-        List<Order> orders = new ArrayList<>();
         int customerId = getCustomerIdFromSession(request);
-        List<Order> customerOrders = orderService.getOrdersForCustomer(customerId);
-        orders.addAll(customerOrders);
+        List<Order> orders = orderService.getOrdersForCustomer(customerId);
         return new ModelAndView(CUSTOMER + "/orders", "orders", orders);
     }
 

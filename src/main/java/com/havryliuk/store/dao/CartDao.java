@@ -1,62 +1,39 @@
 package com.havryliuk.store.dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import com.havryliuk.store.dao.rowmapper.ProductQuantityRowMapper;
 import com.havryliuk.store.entity.CartEntry;
 
 public class CartDao implements GenericStoreDao<CartEntry> {
     private static final String QUANTITY = "quantity";
-    private static final Logger LOG = Logger.getLogger(CartDao.class);
+
     @Autowired
     private JdbcTemplate jdbcTemplate;
-    private Connection connection;
 
     public CartDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public Map<Integer, Integer> findAllByCustomerId(int id) {
-        Map<Integer, Integer> entries = new HashMap<>();
-        try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM cart where customer_id=?" +
-                " ORDER BY product_id")) {
-            statement.setInt(1, id);
-            ResultSet rs = statement.executeQuery();
-            while (rs.next()) {
-                int productId = rs.getInt("product_id");
-                int quantity = rs.getInt(QUANTITY);
-                entries.put(productId, quantity);
-            }
-        } catch (SQLException e) {
-            LOG.error(e);
+    public List<ProductQuantity> findAllByCustomerId(int id) {
+        String query = "SELECT * FROM cart where customer_id = ? ORDER BY product_id";
+        try {
+            return jdbcTemplate.query(query, new ProductQuantityRowMapper(), id);
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<>();
         }
-        return entries;
     }
 
     public boolean recordForProductAndCustomerExists(int customerId, int productId) {
-        try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM cart where product_id=?" +
-                " AND customer_id=?")) {
-            statement.setInt(1, productId);
-            statement.setInt(2, customerId);
-            ResultSet rs = statement.executeQuery();
-            if (rs.next()) {
-                return true;
-            }
-        } catch (SQLException e) {
-            LOG.error(e);
-        }
-        return false;
+        String query = "SELECT * FROM cart where product_id = ? AND customer_id = ?";
+        return jdbcTemplate.queryForList(query, productId, customerId).size() > 0;
     }
 
     @Override
@@ -66,16 +43,9 @@ public class CartDao implements GenericStoreDao<CartEntry> {
 
     @Override
     public int save(CartEntry cartEntry) {
-        try (PreparedStatement statement = connection.prepareStatement("INSERT INTO cart (quantity, customer_id, product_id)" +
-                " VALUES(?, ? , ?)")) {
-            statement.setInt(1, cartEntry.getQuantity());
-            statement.setInt(2, cartEntry.getCustomer().getId());
-            statement.setInt(3, cartEntry.getProduct().getId());
-            return statement.executeUpdate();
-        } catch (SQLException e) {
-            LOG.error(e);
-        }
-        return 0;
+        String query = "INSERT INTO cart (quantity, customer_id, product_id) VALUES(?, ?, ?)";
+        return jdbcTemplate.update(query, cartEntry.getQuantity(), cartEntry.getCustomer().getId(), cartEntry
+                .getProduct().getId());
     }
 
     @Override
@@ -93,35 +63,24 @@ public class CartDao implements GenericStoreDao<CartEntry> {
         int customerId = cartEntry.getCustomer().getId();
         int productId = cartEntry.getProduct().getId();
         int quantity = cartEntry.getQuantity();
-        try (PreparedStatement statement = connection.prepareStatement("UPDATE cart SET quantity=?" +
-                " WHERE customer_id=? AND product_id=?")) {
-            statement.setInt(1, quantity);
-            statement.setInt(2, customerId);
-            statement.setInt(3, productId);
-            return statement.executeUpdate() > 0;
-        } catch (SQLException e) {
-            LOG.error(e);
-        }
-        return false;
+        String query = "UPDATE cart SET quantity = ? WHERE customer_id = ? AND product_id = ?";
+        int result = jdbcTemplate.update(query, quantity, customerId, productId);
+        return result > 0;
     }
 
     public Map<String, Integer> findByProductId(int id) {
-        try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM cart where product_id=?")) {
-            statement.setInt(1, id);
-            ResultSet rs = statement.executeQuery();
-            if (rs.next()) {
-                int customerId = rs.getInt("customer_id");
-                int productId = rs.getInt("product_id");
-                int quantity = rs.getInt(QUANTITY);
-                Map<String, Integer> cartEntryMap = new HashMap<>();
-                cartEntryMap.put("customerId", customerId);
-                cartEntryMap.put("productId", productId);
-                cartEntryMap.put(QUANTITY, quantity);
-                return cartEntryMap;
-            }
-        } catch (SQLException e) {
-            LOG.error(e);
+        String query = "SELECT * FROM cart where product_id = ?";
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList(query, id);
+
+        Map<String, Integer> cartEntryMap = new HashMap<>();
+        for (Map<String, Object> row : rows) {
+            int customerId = (int) row.get("customer_id");
+            int productId = (int) row.get("product_id");
+            int quantity = (int) row.get("quantity");
+            cartEntryMap.put("customerId", customerId);
+            cartEntryMap.put("productId", productId);
+            cartEntryMap.put(QUANTITY, quantity);
         }
-        return new HashMap<>();
+        return cartEntryMap;
     }
 }

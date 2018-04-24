@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.havryliuk.store.entity.Customer;
 import com.havryliuk.store.entity.Order;
@@ -17,6 +18,7 @@ public class OrderService {
     private OrderDao orderDao;
     private static final Logger LOG = Logger.getLogger(OrderService.class);
 
+    @Transactional
     public Optional<Order> createOrder(Customer customer, Map<Product, Integer> products) {
         Order order = Order.builder().products(products).customer(customer).paid(false).build();
         int id = orderDao.save(order);
@@ -37,12 +39,8 @@ public class OrderService {
     }
 
     public boolean payOrder(int id) {
-        boolean result = orderDao.payOrder(id);
+        boolean result = orderDao.updateAsPaid(id);
         LOG.info("Order ID: " + id + " " + (result ? "paid" : "not paid"));
         return result;
-    }
-
-    public void setOrderDao(OrderDao orderDao) {
-        this.orderDao = orderDao;
     }
 }

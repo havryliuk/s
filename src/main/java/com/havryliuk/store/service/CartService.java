@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.havryliuk.store.dao.ProductQuantity;
 import com.havryliuk.store.entity.CartEntry;
 import com.havryliuk.store.entity.Customer;
 import com.havryliuk.store.entity.Product;
@@ -25,7 +26,7 @@ public class CartService {
         int customerId = newCartEntry.getCustomer().getId();
         int productId = newCartEntry.getProduct().getId();
         if (cartDao.recordForProductAndCustomerExists(customerId, productId)) {
-            Map<String, Integer> cartEntryMap = cartDao.findByProductId(newCartEntry.getProduct().getId());
+            Map<String, Integer> cartEntryMap = cartDao.findByProductId(productId);
             Product product = productService.getProductById(cartEntryMap.get("productId"));
             Customer customer = customerService.getCustomerById(cartEntryMap.get("customerId"));
             if (product != null) {
@@ -42,11 +43,12 @@ public class CartService {
 
     public List<CartEntry> getCartForCustomer(int customerId) {
         List<CartEntry> entries = new ArrayList<>();
-        for (Map.Entry<Integer, Integer> entry : cartDao.findAllByCustomerId(customerId).entrySet()) {
-            int productId = entry.getKey();
+        for (ProductQuantity productQuantity : cartDao.findAllByCustomerId(customerId)) {
+            int productId = productQuantity.getProductId();
             Product product = productService.getProductById(productId);
             Customer customer = customerService.getCustomerById(customerId);
-            entries.add(new CartEntry(customer, product, entry.getValue()));
+            int quantity = productQuantity.getQuantity();
+            entries.add(new CartEntry(customer, product, quantity));
         }
         return entries;
     }

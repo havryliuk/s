@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 import com.havryliuk.store.entity.Customer;
@@ -26,7 +27,12 @@ public class CustomerService {
     }
 
     public Customer getCustomerById(int id) {
-        Customer customer = customerDao.find(id);
+        Customer customer;
+        try {
+            customer = customerDao.find(id);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
         LOG.info("Customer found: " + customer);
         return customer;
     }

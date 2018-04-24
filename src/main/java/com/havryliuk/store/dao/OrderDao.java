@@ -1,9 +1,6 @@
 package com.havryliuk.store.dao;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,17 +10,21 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
 
+import com.havryliuk.store.dao.rowmapper.OrderRowMapper;
+import com.havryliuk.store.dao.rowmapper.ProductQuantityRowMapper;
 import com.havryliuk.store.entity.Order;
 import com.havryliuk.store.entity.Product;
 
 public class OrderDao implements GenericStoreDao<Order> {
     private static final Logger LOG = Logger.getLogger(OrderDao.class);
+
     @Autowired
     private JdbcTemplate jdbcTemplate;
     @Autowired
     private ProductDao productDao;
-    private Connection connection;
 
     public OrderDao(JdbcTemplate jdbcTemplate, ProductDao productDao) {
         this.jdbcTemplate = jdbcTemplate;
@@ -36,99 +37,21 @@ public class OrderDao implements GenericStoreDao<Order> {
     }
 
     public List<Order> findAllByCustomerId(int customerId) {
-        List<Order> orders = new ArrayList<>();
-        try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM public.order" +
-                " WHERE customer_id = ? ORDER BY id")) {
-            statement.setInt(1, customerId);
-            ResultSet rs = statement.executeQuery();
-            while (rs.next()) {
-                int orderId = rs.getInt("id");
-                boolean paid = rs.getBoolean("paid");
-                orders.add(Order.builder().id(orderId).paid(paid).build());
-            }
-        } catch (SQLException e) {
-            LOG.error(e);
-        }
-        return orders;
+        String query = "SELECT * FROM public.order WHERE customer_id = ? ORDER BY id";
+        return jdbcTemplate.query(query, new OrderRowMapper(), customerId);
     }
 
     @Override
     public int save(Order order) {
-        int id = -1;
-        try (PreparedStatement statement = connection.prepareStatement("INSERT INTO public.order (customer_id, paid)" +
-                " VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS)) {
-
-            connection.setAutoCommit(false);
-            statement.setInt(1, order.getCustomer().getId());
-            statement.setBoolean(2, order.isPaid());
-            statement.executeUpdate();
-            ResultSet rs = statement.getGeneratedKeys();
-            if (rs.next()) {
-                id = rs.getInt(1);
-                order.setId(id);
-            } else {
-                connection.rollback();
-                return id;
-            }
-
-            if (!insertOrderLines(order)) {
-                connection.rollback();
-                return -1;
-            }
-
-            if (!deleteCartEntries(order)) {
-                connection.rollback();
-                return -1;
-            }
-
-        } catch (SQLException e) {
-            try {
-                connection.rollback();
-            } catch (SQLException e1) {
-                LOG.error(e1);
-            }
-            LOG.error(e);
+        int orderId = createOrderHeader(order);
+        if (orderId != -1) {
+            order.setId(orderId);
+            insertOrderLines(order);
+            deleteCartEntries(order);
+            return orderId;
+        } else {
+            return orderId;
         }
-        try {
-            connection.commit();
-            connection.setAutoCommit(true);
-        } catch (SQLException e) {
-            LOG.error(e);
-        }
-        return id;
-    }
-
-    private boolean deleteCartEntries(Order order) {
-        try (PreparedStatement deleteCartStatement = connection.prepareStatement("DELETE FROM cart WHERE " +
-                "customer_id=?")) {
-            deleteCartStatement.setInt(1, order.getCustomer().getId());
-            int result = deleteCartStatement.executeUpdate();
-            if (result <= 0) {
-                return false;
-            }
-        } catch (SQLException e) {
-            LOG.error(e);
-        }
-        return true;
-    }
-
-    private boolean insertOrderLines(Order order) {
-        for (Map.Entry<Product, Integer> row : order.getProducts().entrySet()) {
-            int productId = row.getKey().getId();
-            try (PreparedStatement linesStatement = connection.prepareStatement("INSERT INTO order_lines " +
-                    "(order_id, product_id, quantity) VALUES (?, ?, ?)")) {
-                linesStatement.setInt(1, order.getId());
-                linesStatement.setInt(2, productId);
-                linesStatement.setInt(3, row.getValue());
-                int result = linesStatement.executeUpdate();
-                if (result <= 0) {
-                    return false;
-                }
-            } catch (SQLException e) {
-                LOG.error(e);
-            }
-        }
-        return true;
     }
 
     @Override
@@ -138,39 +61,26 @@ public class OrderDao implements GenericStoreDao<Order> {
 
     @Override
     public Order find(int id) {
-        boolean paid;
-        try (PreparedStatement statement = connection.prepareStatement("SELECT paid FROM public.order WHERE id = ?")) {
-            statement.setInt(1, id);
-            ResultSet rs = statement.executeQuery();
-            if (rs.next()) {
-                paid = rs.getBoolean("paid");
-                Map<Product, Integer> orderLines = getOrderLines(id);
-                return Order.builder().id(id).paid(paid).products(orderLines).build();
-            }
-        } catch (SQLException e) {
-            LOG.error(e);
+        String query = "SELECT paid FROM public.order WHERE id = ?";
+        Boolean paid = jdbcTemplate.queryForObject(query, new Object[]{id}, Boolean.class);
+        if (paid != null) {
+            Map<Product, Integer> orderLines = getOrderLines(id);
+            return Order.builder().id(id).paid(paid).products(orderLines).build();
         }
         return null;
     }
 
     private Map<Product, Integer> getOrderLines(int id) {
-        Map<Product, Integer> orderLines = new HashMap<>();
-        try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM order_lines" +
-                " WHERE order_id=?")) {
-            statement.setInt(1, id);
-            ResultSet rs = statement.executeQuery();
-            while (rs.next()) {
-                int productId = rs.getInt("product_id");
-                Product product = productDao.find(productId);
-                if (product != null) {
-                    int quantity = rs.getInt("quantity");
-                    orderLines.put(product, quantity);
-                }
-            }
-        } catch (SQLException e) {
-            LOG.error(e);
-        }
+        String query = "SELECT * FROM order_lines WHERE order_id = ?";
+        List<ProductQuantity> productQuantities = jdbcTemplate.query(query, new ProductQuantityRowMapper(), id);
 
+        Map<Product, Integer> orderLines = new HashMap<>();
+        for (ProductQuantity quantity : productQuantities) {
+            Product product = productDao.find(quantity.getProductId());
+            if (product != null) {
+                orderLines.put(product, quantity.getQuantity());
+            }
+        }
         return orderLines;
     }
 
@@ -179,18 +89,47 @@ public class OrderDao implements GenericStoreDao<Order> {
         return false;
     }
 
-    public boolean payOrder(int id) {
-        try (PreparedStatement statement = connection.prepareStatement("UPDATE public.order SET paid=?" +
-                " WHERE id=?")) {
-            statement.setBoolean(1, true);
-            statement.setInt(2, id);
-            int result = statement.executeUpdate();
-            if (result > 0) {
-                return true;
-            }
-        } catch (SQLException e) {
-            LOG.error(e);
+    public boolean updateAsPaid(int id) {
+        String query = "UPDATE public.order SET paid = ? WHERE id = ?";
+        int result = jdbcTemplate.update(query, true, id);
+        return result > 0;
+    }
+
+    private int createOrderHeader(Order order) {
+        String query = "INSERT INTO public.order (customer_id, paid) VALUES (?, ?)";
+        final PreparedStatementCreator preparedStatementCreator = connection -> {
+            final PreparedStatement preparedStatement = connection.prepareStatement(query, Statement
+                    .RETURN_GENERATED_KEYS);
+            preparedStatement.setInt(1, order.getCustomer().getId());
+            preparedStatement.setBoolean(2, order.isPaid());
+            return preparedStatement;
+        };
+        final GeneratedKeyHolder holder = new GeneratedKeyHolder();
+        jdbcTemplate.update(preparedStatementCreator, holder);
+
+        int orderId;
+        try {
+            orderId = Integer.parseInt(holder.getKeys().get("id").toString());
+            LOG.info("Order created: " + order.toString());
+        } catch (NullPointerException e) {
+            orderId = -1;
         }
-        return false;
+        return orderId;
+    }
+
+    private void deleteCartEntries(Order order) {
+        int customerId = order.getCustomer().getId();
+        String query = "DELETE FROM cart WHERE customer_id = ?";
+        jdbcTemplate.update(query, customerId);
+    }
+
+    private void insertOrderLines(Order order) {
+        int orderId = order.getId();
+        for (Map.Entry<Product, Integer> row : order.getProducts().entrySet()) {
+            int productId = row.getKey().getId();
+            int quantity = row.getValue();
+            String query = "INSERT INTO order_lines (order_id, product_id, quantity) VALUES (?, ?, ?)";
+            jdbcTemplate.update(query, orderId, productId, quantity);
+        }
     }
 }

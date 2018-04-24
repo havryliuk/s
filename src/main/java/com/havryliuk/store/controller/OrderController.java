@@ -74,7 +74,8 @@ public class OrderController extends AbstractController {
         if (result) {
             return new ModelAndView("order/paid", "orderId", id);
         } else {
-            return new ErrorViewWithMessage("Failed to pay order ID: " + id);
+            return new ErrorViewWithMessage("Failed to pay order ID: " + id + ". It is either already paid or does " +
+                    "not exist.");
         }
     }
 }
