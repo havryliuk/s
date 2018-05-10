@@ -77,7 +77,7 @@ public class ProductController extends AbstractController {
                 return new ModelAndView(PRODUCT + "/created", PRODUCT, product);
             }
         } else {
-            return new ModelAndView(PRODUCT + "/invalidData", ImmutableMap.of("description", description, "price",
+            return new ModelAndView(PRODUCT + "/invalidProduct", PRODUCT, ImmutableMap.of("description", description, "price",
                     price));
 
         }

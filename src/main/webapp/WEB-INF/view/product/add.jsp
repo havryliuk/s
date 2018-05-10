@@ -21,7 +21,7 @@
         <option>TOYS</option>
         <option>OTHER</option>
     </select>
-</label><br>
+</label><br><br>
     <input type="submit" value="Create">
 </form>
 <br>

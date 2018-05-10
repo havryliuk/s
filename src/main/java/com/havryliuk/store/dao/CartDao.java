@@ -33,7 +33,7 @@ public class CartDao implements GenericStoreDao<CartEntry> {
 
     public boolean recordForProductAndCustomerExists(int customerId, int productId) {
         String query = "SELECT * FROM cart where product_id = ? AND customer_id = ?";
-        return jdbcTemplate.queryForList(query, productId, customerId).size() > 0;
+        return !jdbcTemplate.queryForList(query, productId, customerId).isEmpty();
     }
 
     @Override
@@ -46,11 +46,6 @@ public class CartDao implements GenericStoreDao<CartEntry> {
         String query = "INSERT INTO cart (quantity, customer_id, product_id) VALUES(?, ?, ?)";
         return jdbcTemplate.update(query, cartEntry.getQuantity(), cartEntry.getCustomer().getId(), cartEntry
                 .getProduct().getId());
-    }
-
-    @Override
-    public boolean delete(CartEntry cartEntry) {
-        return false;
     }
 
     @Override

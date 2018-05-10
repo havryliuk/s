@@ -55,11 +55,6 @@ public class OrderDao implements GenericStoreDao<Order> {
     }
 
     @Override
-    public boolean delete(Order object) {
-        return false;
-    }
-
-    @Override
     public Order find(int id) {
         String query = "SELECT paid FROM public.order WHERE id = ?";
         Boolean paid = jdbcTemplate.queryForObject(query, new Object[]{id}, Boolean.class);

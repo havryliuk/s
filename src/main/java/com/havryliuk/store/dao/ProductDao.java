@@ -1,8 +1,6 @@
 package com.havryliuk.store.dao;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
@@ -43,11 +41,6 @@ public class ProductDao implements GenericStoreDao<Product> {
         jdbcTemplate.update(preparedStatementCreator, holder);
         LOG.info("Product created: " + product.toString());
         return Integer.parseInt(holder.getKeys().get("id").toString());
-    }
-
-    @Override
-    public boolean delete(Product product) {
-        return false;
     }
 
     @Override

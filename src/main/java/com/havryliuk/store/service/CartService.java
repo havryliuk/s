@@ -22,6 +22,10 @@ public class CartService {
     @Autowired
     private CartDao cartDao;
 
+    public CartService(CartDao cartDao) {
+        this.cartDao = cartDao;
+    }
+
     public boolean addProductToCart(CartEntry newCartEntry) {
         int customerId = newCartEntry.getCustomer().getId();
         int productId = newCartEntry.getProduct().getId();
