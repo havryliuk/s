@@ -2,6 +2,7 @@ package com.havryliuk.store.controller;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.google.common.collect.ImmutableMap;
 import com.havryliuk.store.entity.CartEntry;
 import com.havryliuk.store.entity.Customer;
 import com.havryliuk.store.entity.Product;
@@ -78,8 +78,8 @@ public class ProductController extends AbstractController {
                 return new ModelAndView(PRODUCT + "/created", PRODUCT, product);
             }
         } else {
-            return new ModelAndView(PRODUCT + "/invalidProduct", PRODUCT, ImmutableMap.of("description", description, "price",
-                    price));
+            return new ModelAndView(PRODUCT + "/invalidProduct", PRODUCT, Map.of("description", description, "price",
+                                                                                 price));
 
         }
         return new ModelAndView("error");
