@@ -1,7 +1,9 @@
 package com.havryliuk.store.service;
 
 import java.util.List;
+import java.util.Optional;
 
+import com.havryliuk.store.repository.ProductRepository;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,6 +16,8 @@ public class ProductService {
     private static final Logger LOG = Logger.getLogger(ProductService.class);
     @Autowired
     private ProductDao productDao;
+    @Autowired
+    private ProductRepository productRepository;
 
     public int addProduct(Product product) {
         int id = productDao.save(product);
@@ -21,11 +25,13 @@ public class ProductService {
         return id;
     }
 
-    public Product getProductById(int id) {
-        Product product;
-        product = productDao.find(id);
-        LOG.info("Found product: " + product);
-        return product;
+    public Optional<Product> getProductById(int id) {
+        Optional<Product> product = productRepository.findById(id);
+        if (product.isPresent()) {
+            LOG.info("Found product: " + product);
+            return product;
+        }
+        return Optional.empty();
     }
 
     public List<Product> getAllProducts() {

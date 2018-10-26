@@ -23,10 +23,12 @@ import com.havryliuk.store.service.SecurityService;
 @ComponentScan(basePackages = {"com.havryliuk.store"})
 public class StoreConfig {
     private final JdbcConfig jdbcConfig;
+    private final RepositoryConfig repositoryConfig;
 
     @Autowired
-    public StoreConfig(JdbcConfig jdbcConfig) {
+    public StoreConfig(JdbcConfig jdbcConfig, RepositoryConfig repositoryConfig) {
         this.jdbcConfig = jdbcConfig;
+        this.repositoryConfig = repositoryConfig;
     }
 
     @Bean

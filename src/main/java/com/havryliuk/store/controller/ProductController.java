@@ -2,6 +2,7 @@ package com.havryliuk.store.controller;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -42,8 +43,8 @@ public class ProductController extends AbstractController {
 
     @GetMapping("/{id}")
     public ModelAndView getProductById(HttpServletRequest request, @PathVariable("id") int id) {
-        Product product = productService.getProductById(id);
-        if (product != null) {
+        Optional<Product> product = productService.getProductById(id);
+        if (product.isPresent()) {
             UserType userType = UserType.valueOf(request.getSession().getAttribute("userType").toString());
             if (userType.equals(UserType.ADMIN)) {
                 return new ModelAndView("admin/product", PRODUCT, product);
@@ -110,15 +111,15 @@ public class ProductController extends AbstractController {
 
         int customerId = getCustomerIdFromSession(request);
 
-        Product product = productService.getProductById(productId);
+        Optional<Product> product = productService.getProductById(productId);
         Customer customer = customerService.getCustomerById(customerId);
-        if (product == null) {
+        if (!product.isPresent()) {
             return new ErrorViewWithMessage("Product ID: " + productId + " not found!");
         }
         if (customer == null) {
             return new ErrorViewWithMessage("Customer ID: " + customerId + " not found!");
         }
-        CartEntry cartEntry = new CartEntry(customer, product, quantity);
+        CartEntry cartEntry = new CartEntry(customer, product.get(), quantity);
         if (cartService.addProductToCart(cartEntry)) {
             return new ModelAndView(PRODUCT + "/addedToCart", "cartEntry", cartEntry);
         } else {

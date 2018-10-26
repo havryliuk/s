@@ -3,6 +3,7 @@ package com.havryliuk.store.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,10 +32,10 @@ public class CartService {
         int productId = newCartEntry.getProduct().getId();
         if (cartDao.recordForProductAndCustomerExists(customerId, productId)) {
             Map<String, Integer> cartEntryMap = cartDao.findByProductId(productId);
-            Product product = productService.getProductById(cartEntryMap.get("productId"));
+            Optional<Product> product = productService.getProductById(cartEntryMap.get("productId"));
             Customer customer = customerService.getCustomerById(cartEntryMap.get("customerId"));
-            if (product != null) {
-                CartEntry previous = new CartEntry(customer, product, cartEntryMap.get("quantity"));
+            if (product.isPresent()) {
+                CartEntry previous = new CartEntry(customer, product.get(), cartEntryMap.get("quantity"));
                 int newQuantity = previous.getQuantity() + newCartEntry.getQuantity();
                 previous.setQuantity(newQuantity);
                 return cartDao.update(previous);
@@ -49,10 +50,10 @@ public class CartService {
         List<CartEntry> entries = new ArrayList<>();
         for (ProductQuantity productQuantity : cartDao.findAllByCustomerId(customerId)) {
             int productId = productQuantity.getProductId();
-            Product product = productService.getProductById(productId);
+            Optional<Product> product = productService.getProductById(productId);
             Customer customer = customerService.getCustomerById(customerId);
             int quantity = productQuantity.getQuantity();
-            entries.add(new CartEntry(customer, product, quantity));
+            entries.add(new CartEntry(customer, product.get(), quantity));
         }
         return entries;
     }
